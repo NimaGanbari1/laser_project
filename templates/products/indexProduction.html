@@ -1,0 +1,52 @@
+<table class="table table-bordered">
+    <!--<thead>
+        <tr>
+            <th>title</th>
+            <th>price</th>
+            <th>caption</th>
+            <th>is_active</th>
+            <th>is_enable</th>
+            <th>uniqe_code</th>
+            <th>categories</th>
+            <th>create_time</th>
+        </tr>
+    </thead>-->
+        <tbody>
+            {% for user in users %}
+                <tr>
+                <p>title: {{ user.title }}</p>
+                <p>price: {{ user.price }}</p>
+                <p>caption: {{ user.caption }}</p>
+                <p>is_active: {{ user.is_active }}</p>
+                <p>is_enable: {{ user.is_enable }}</p>
+                <p>code: {{ user.uniqe_code }}</p>
+                <p>category title: {{ user.categories.title }}</p>
+                <p>create_time: {{ user.create_time }}</p>
+                </tr>
+                <hr>
+            {% endfor %}
+        </tbody>
+</table>
+  
+<!--{% if users.has_other_pages %}
+    <ul class="pagination">
+        {% if users.has_previous %}
+            <li><a href="?page={{ users.previous_page_number }}">&laquo;</a></li>
+        {% else %}
+            <li class="disabled"><span>&laquo;</span></li>
+        {% endif %}
+        {% for i in users.paginator.page_range %}
+            {% if users.number == i %}
+                <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+            {% else %}
+                <li><a href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if users.has_next %}
+            <li><a href="?page={{ users.next_page_number }}">&raquo;</a></li>
+        {% else %}
+            <li class="disabled"><span>&raquo;</span></li>
+        {% endif %}
+    </ul>
+{% endif %}
+-->
