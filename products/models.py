@@ -37,6 +37,9 @@ class Product(models.Model):
         db_table = 'Posts'
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
+    
+    def __str__(self):
+        return self.title
 
 class Post_File(models.Model):
     FILE_VIDEO = 1
@@ -48,7 +51,7 @@ class Post_File(models.Model):
     title = models.CharField(_("title"),max_length=50)
     file_type =models.PositiveSmallIntegerField(_("file type"), choices=FILE_TYPES)
     fil = models.FileField(_("file"),upload_to="media/%Y/%m/%d/")
-    post = models.ForeignKey('Product',verbose_name=_("Product"), on_delete=models.CASCADE)
+    post = models.ForeignKey('Product',verbose_name=_("Product"),related_name='files', on_delete=models.CASCADE)
     is_enable = models.BooleanField(_("is enable"),default=True)
     create_time = models.DateTimeField(_("create time"),auto_now_add=True)
     update_time = models.DateTimeField(_("update time"),auto_now=True)

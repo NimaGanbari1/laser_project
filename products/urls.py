@@ -5,4 +5,5 @@ from .views import *
 urlpatterns = [
     path('list/',ProductionList),
     path('index/<int:page>/',index),
+    path('',HomePage),
 ]
