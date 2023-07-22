@@ -13,13 +13,11 @@
 <body>
     <main>
         <h1>Welcome to My Website</h1>
-        {% for x in posts %}
-        <p>{{x.title}}</p>
-        <p>{{x.price}}</p>
-        <p>{{x.categories}}</p>
-        <p>{{x.files}}</p>
-        <hr>
-        {%endfor%}
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form }}
+            <input type="submit" value="Submit">
+        </form>
             
     </main>
 </body>
