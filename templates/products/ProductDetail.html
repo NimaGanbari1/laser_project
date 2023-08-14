@@ -1,0 +1,51 @@
+<table class="table table-bordered">
+    <!--<thead>
+        <tr>
+            <th>title</th>
+            <th>price</th>
+            <th>caption</th>
+            <th>is_active</th>
+            <th>is_enable</th>
+            <th>uniqe_code</th>
+            <th>categories</th>
+            <th>create_time</th>
+        </tr>
+    </thead>-->
+        <tbody>
+                <tr>
+                <p>title: {{ post.title }}</p>
+                <p>price: {{ post.price }}</p>
+                <p>caption: {{ post.caption }}</p>
+                <p>is_active: {{ post.is_active }}</p>
+                <p>is_enable: {{ post.is_enable }}</p>
+                <p>code: {{ post.uniqe_code }}</p>
+                <p>category title: {{ post.categories.title }}</p>
+                <p>create_time: {{ post.create_time }}</p>
+                </tr>
+                <hr>
+
+                <form action="" method="post">
+                    {% csrf_token %}
+                    <p>Count: {{ form.count }}</p>
+                    <!--در این قسمت باید این دو فیلد پایینی را جوری تنظیم کنیم که تغییر نکند-->
+                    <p readonly>uniqe code: {{ form.uniqeCode }}</p>
+                    <p readonly>user: {{ form.user }}</p>
+                    <input type="submit" value="ثبت شفارش">
+                </form>
+                <hr>
+                <p>Attention: برای ارسال دیدگاه ابتدا اسم خود را در پروفایل شخصی ثبت کنید</p>
+                <form action="/products/comment/" method="post">
+                    {% csrf_token %}
+                    <p>{{ comform }}</p>
+                    <input type="submit" value="ارسال دیدگاه">
+                </form>
+        </tbody>
+        <!--باید در این قسمت جایی برای انتخاب تعداد و دکمه ای برای اضافه کردن تعداد و کد این محصول به سبد خرید اضافه کنیم -->
+        <!--uniqe_code-->
+        <!--count-->
+        <!--در کارت یک آبجکت میسازیم که یوزر همین شخص لاگین کردست و یونیک کد و تعداد این محصول رو هم مشخص میکنیم-->
+        <!-- -->
+
+
+</table>
+  

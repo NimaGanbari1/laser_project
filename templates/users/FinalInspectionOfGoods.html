@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <!--<meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+    <!--<title>ProductionList</title>-->
+    <!--<link rel="stylesheet" href="./style.css">-->
+    <!--<link rel="icon" href="./favicon.ico" type="image/x-icon">-->
+</head>
+
+<body>
+    <main>
+        <h1>Welcome to My Website</h1>
+        <!--        price:قیمت نهایی 
+                    address: آدرس کاربر
+                    product:محصولات
+                    PricePerGood:قیمت نهایی هر محصولات
+                    products:محصولات بر اساس کد محصول و تعداد
+        -->
+        {% for user in product %}
+                <tr>
+                <p>title: {{ user.title }}</p>
+                <p>price: {{ user.price }}</p>
+                <p>code: {{ user.uniqe_code }}</p>
+                </tr>
+                <hr>
+        {% endfor %}
+        {% for user in products %}
+                <tr>
+                <p>count: {{ user }}</p>
+                </tr>
+                <hr>
+        {% endfor %}
+        {% for user in PricePerGood %}
+                <tr>
+                <p>PricePerGood: {{ user }}</p>
+                </tr>
+                <hr>
+        {% endfor %}
+
+        <form action="/users/final/" method="post">
+            {% csrf_token %}
+            <p>Address: {{ address }}</p>
+            <input type="submit" value="صفحه پرداخت ">
+        </form>
+        
+
+    </main>
+</body>
+
+</html>

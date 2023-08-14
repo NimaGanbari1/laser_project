@@ -14,10 +14,13 @@
     <main>
         <h1>Welcome to My Website</h1>
         {% for x in posts %}
-        <p>{{x.title}}</p>
-        <p>{{x.price}}</p>
-        <p>{{x.categories}}</p>
-        <p>{{x.files}}</p>
+        <!--اگر علامت اسلش را قبل از پروداکت نگذاریم باعث میشود که این آدرس جدید به آدرس قبلی کانکت شود و به مشکل میخوریم-->
+        <p><a href="/products/indexdetail/{{ x.uniqe_code }}/">title:{{x.title}}</a></p>
+        <p>code: {{ x.uniqe_code }}</p>
+        <p>caption: {{ x.caption }}</p>
+        <p>price: {{x.price}}</p>
+        <p>categories: {{x.categories}}</p>
+        <p>files: {{x.files}}</p>
         <hr>
         {%endfor%}
             

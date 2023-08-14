@@ -10,7 +10,7 @@ User = get_user_model()
 class MyUserAdmin(UserAdmin):
     fieldsets = (
         (None, {"fields": ('username','password')}),
-        (_('personal info'),{"fields": ('first_name','last_name','phone_number','email')}),
+        (_('personal info'),{"fields": ('first_name','last_name','phone_number','email','address')}),
         (_('permissions'),{"fields": ('is_active','is_staff','is_superuser','groups','user_permissions')}),
         (_('important dates'),{"fields": ('last_login','date_joined')}),
         )
@@ -49,6 +49,16 @@ class MyUserAdmin(UserAdmin):
         return queryset,may_have_duplicates
 
 
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['id','Code','Count','user']
+    #زمانی که بر روی یوزر در پنل ادمین کلیک میکنیم ارور میدهد
+    #list_display_links = ['user']
+    #pass
+    
+         
+    
+    
 admin.site.unregister(Group)
 admin.site.register(User,MyUserAdmin)  
 #admin.site.register(UserProfile)  
+admin.site.register(Cart,CartAdmin)
