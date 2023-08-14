@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <!--<meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+    <!--<title>ProductionList</title>-->
+    <!--<link rel="stylesheet" href="./style.css">-->
+    <!--<link rel="icon" href="./favicon.ico" type="image/x-icon">-->
+</head>
+<!--این برای زمانی هست که کاربر به سبد خرید خود میرود 
+    در این صفحه باید محصولات قابلیت ادیت داشته باشند 
+    در این صفحه باید محصولات با خصوصیات قیمتی و قیمت نهایی و تعداد هر محصول و غیره
+    نشان داده شوند وبعد از اینکه کاربر دید و تایید کرد باید به صفحه نهایی کردن برود که در انجا قابلیت ادیت نداریم وبعد  
+    به سراغ صفحه چرداخت میرویم-->
+
+
+
+    <!--در این قسمت  باید یک فرم به طرف کاربر فرستاده شود که مقادیر پیشفرض در آنها قرار گیرد
+    -->
+<body>
+    
+    <main>
+        <!--در این قسمت اگر لیست ما خالی بود کافیه که نشون بده خالیه و دکمه بازگشت رو هم بگذاریم و دکمه های دیگر نیاز نیست-->
+        <!-- products2 - ListForm or title-->
+        <h1>Welcome to My Website</h1>  
+        <p>{{temp}}</p>
+        {% for x in products2 %}
+            <p>title: {{x.title}}</p>
+            <p>price: {{x.price}}</p>
+        {%endfor%}
+        
+        
+        
+        <!--در این قسمت باید چند فرم نمایش داده شود و مقادیر تمامی فرم ها ارسال شود 
+            اما یک مشکلی که در این قسمت وجود دارد این است که فقط فرم آخر بر کردانده میشود 
+            در حالی که باید تمامی فم ها بازگردند که این باید درست شود
+        -->
+        <form action="" method="post">
+            {% csrf_token %}
+            <!--{{ListForm}}-->
+            {% for x in ListForm %}
+                {{x.as_p}}
+            <!--<p>count: {{x.count}}</p>-->
+            <!--<p>code: {{x.code}}</p>-->
+            <!--<label for="code">Code:</label>
+            <input type="number" name="Code" value=x.code readonly>-->
+            {%endfor%}
+
+            <hr>
+            <input type="submit" value="بررسی تغییرات">
+        </form>
+        
+                
+                
+
+    </main>
+    <button onclick="history.back()">Go Back</button>
+    <button><a href="/users/final/">title:{{x.title}} نهایی کردن خرید</button></a>
+</body>
+
+</html>

@@ -13,12 +13,14 @@
 <body>
     <main>
         <h1>Welcome to My Website</h1>
-        <form action="" method="post">
-            {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Submit">
-        </form>
-        <p><a href="/users/login/">login</a></p>
+        <p>Address: {{address}}</p>
+        <!--بهتره که شماره تلفن و ایمیل چوری طراحی شوند که وقتی روی آنها کلیک کردیم در 
+            cliboard
+            کپی شوند-->
+        <p>Phone Number: {{phone}}</p>
+        <p>E-mail: {{email}}</p>
+        <p>Description: {{des}}</p>
+        
             
     </main>
 </body>

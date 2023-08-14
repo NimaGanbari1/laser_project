@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core import validators
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, send_mail
-
+from django_mysql.models import ListCharField
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -14,24 +14,25 @@ class UserManager(BaseUserManager):
         Create and save a user with the given username, email, and password.
         """
         now = timezone.now()
-        if not username:
-            username = phone_number
-        if not username:
-            username = email
+        #if phone_number != None:
+        #    email = phone_number
+        #else:
+        #    phone_number = email
         email = self.normalize_email(email)
         # Lookup the real model class from the global app registry so this
         # manager method can be used in migrations. This is fine because
         # managers are by definition working on the real model.
         # GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
         # username = GlobalUserModel.normalize_username(username)
-        print(type(email))
+        #print(type(email))
+        #print(email)
         user = self.model(phone_number=phone_number,
-                            is_staff=is_staff,
-                            is_superuser=is_superuser,
-                            date_joined=now,
-                            username=username,
-                            email=email
-                            **extra_fields)
+                          is_staff=is_staff,
+                          is_superuser=is_superuser,
+                          date_joined=now,
+                          username=username,
+                          email=email,
+                          **extra_fields)
 
         # user.password = make_password(password)
         # user.save(using=self._db)
@@ -115,6 +116,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'Unselect this instead of deleting accounts.'
         ),
     )
+    address = models.TextField(_('address'),blank=True,null=True)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     last_seen = models.DateTimeField(_('last senn date'), null=True)
     objects = UserManager()
@@ -224,3 +226,29 @@ class Province(models.Model):
         return self.name
 
 
+class Cart(models.Model):
+    #ListOfCode = ListCharField(
+    #    base_field=models.CharField(_("code"), max_length=7),
+    #    size=15,
+    #    max_length=130,  # 6 * 10 character nominals, plus commas
+    #)
+    #ListOfCount = ListCharField(
+    #    base_field=models.CharField(_("count"), max_length=4),
+    #    size=15,
+    #    max_length=90,  # 6 * 10 character nominals, plus commas
+    #)
+    Code = models.IntegerField()
+    Count = models.SmallIntegerField()
+    user = models.ForeignKey(to=User,related_name='carts', on_delete=models.CASCADE)
+    
+    #def __str__(self):
+    #    return self.user
+    class Meta:
+        #اسم تیبلی که برای پکیج در دیتابیس در نظر گرفته میشود است
+        db_table = "Carts"
+        verbose_name = _("Cart")
+        verbose_name_plural = _("Carts")
+    
+    
+    
+    

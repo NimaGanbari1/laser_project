@@ -11,9 +11,13 @@ from email.message import EmailMessage
 import smtplib
 from secrets import compare_digest
 #import mailtrap as mt
-from .forms import RegisterFrom,createUserForm,UserLoginForm
+from .forms import RegisterFrom,createUserForm,UserLoginForm,EditCartForm,FinalAddresForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
+from .models import Cart
+from products.models import Product
+#from products.forms import CreateCartForm
+
 
 def send_mail(email_r, code_r):
     EMAIL_HOST = 'smtp.gmail.com'
@@ -50,7 +54,7 @@ def register_v(request):
                 else:
                     user = User.objects.get(email=phonemail)
                 print(code_random)
-                return HttpResponse({'titl1': 'The code send to your phone. Please enter it.'})
+                return HttpResponse({'this phone number is alredy registered': 'The code send to your phone. Please enter it.'})
             except User.DoesNotExist:
                 if phonemail.isdigit():
                     cache.set(str(phonemail),str(code_random),3*60)
@@ -91,12 +95,12 @@ def create_user_v(request):
                 print(code_cache)
                 print(code_rand)
                 if not compare_digest(code_cache, code_rand):
-                    return HttpResponse({'title1':'The entered code is invalid'})
+                    return HttpResponse({'Compare is Not Valid':'The entered code is invalid'})
                 print("123123123")
                 User.objects.create_user(phone_number=phonemail,password=password,username=phonemail)
                 print("123123123")
                 messages.success(request,'user registered successfully','success')
-                response = redirect('/')
+                response = redirect('/users/login/')
                 return response            
                 #return HttpResponse({'title9':'The entered code is invalid'})
             else:
@@ -110,7 +114,7 @@ def create_user_v(request):
                 print("120230")
                 User.objects.create_user(email=phonemail,password=password,username=phonemail)
                 messages.success(request,'user registered successfully','success')
-                response = redirect('/')
+                response = redirect('/users/login/')
                 return response
                 #return HttpResponse({'title8':'The entered code is invalid'})
     else:
@@ -118,10 +122,10 @@ def create_user_v(request):
     return render(request,"users/create_user.html",{"form": form})    
     #return HttpResponse({'title3':'Your information has been successfully registered'})     
             
-            
+#برای زمانی هست که کاربر میخواهد در سیستم لاگین کند           
 @csrf_exempt
 @require_http_methods(["POST","GET"])      
-def login_v(request):
+def login_v(request):   
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
         print("123123123")
@@ -135,17 +139,247 @@ def login_v(request):
             else:
                 print("120")
                 messages.error(request,'logged failed','failed')
-                return redirect('/')    
+                return redirect('/users/login/')    
                 
     else:
         form = UserLoginForm()
             
     return render(request,"users/login.html",{"form": form})
   
-          
+#برای زمانی هست که کاربر میخواد در سیستم لاگ اوت کند         
 def logout_v(request):
     logout(request)
     messages.success(request,'logged out successfully')
     return redirect('/')
              
+#برای زمانی هست که کاربر روی سبد خرید خود را میزند و می خواهد سبد خرید خود را ببیند
+@csrf_exempt
+@require_http_methods(["GET","POST"]) 
+def Cart_v(request):
+    print("1")
+    if request.method == 'GET':
+        print("1")
+        if request.user.is_authenticated:
+            #pass
+            #list_of_product = Cart.objects.filter(user=request.user)
+            
+            print("1")
+            list_of_product = Cart.objects.filter(user=request.user).values()
+            temp1 = ''
+            if not list_of_product:
+                temp1 = 'the list is empty'  
+            #list_of_product = User.carts
+            #for x in list_of_product:
+            #    print(x.Code)
+            #    print(x.Count)
+            print(list_of_product)
+            #ListCount = []
+            products2 = []
+            ListForm = []
+            for x in list_of_product:
+                
+                #temp1 = x.values()
+                #print(temp1)
+                #print(type(temp1))
+                print(list(x.values())[1])
+                temp = Product.objects.get(uniqe_code=list(x.values())[1])
+                products2.append(temp)
+                #ListCount.append(list(x.values())[2])
+                intaial_data ={
+                'count'    : list(x.values())[2],
+                'code'     : list(x.values())[1]
+                }
+                print(list(x.values())[2])
+                form = EditCartForm(initial=intaial_data)
+                print("7777777777777777777777777777")
+                print(form['code'])
+                print(form['count'])
+                ListForm.append(form)
+                print(ListForm[0]['code'])
+            print("1")
+            
+            
+            #لیست محصولات بر اساس تعداد و کد محصول + لیست محصولات بر اساس آبجکت
+            context = {'products2':products2,'ListForm':ListForm,'temp':temp1}
+            return render(request,"users/cart.html",context=context)
+        else:
+            messages.error(request,"please login ,tryagain","failed")
+            return redirect('/')
+    #این برای زمانی هست که کاربر تغییراتی در محصولات ایجاد میکند و بر روی گزینه اعمال تغییرات کلیک میکند
+    #این قسمت از تابع هم باید زمانی درست شود که اطلاعات از فرم صحیح دریافت شده باشدکه الان اطلاعات درست دریافت نمشود
+    elif request.method == 'POST':
+        print("1")
+        form = EditCartForm(request.POST)
+        print("1")
+        if form.is_valid():
+            print("1")
+            cd = form.cleaned_data
+            #print(cd)
+            print(len(cd))
+            for x in cd:
+                print(x)
+            list_of_product = Cart.objects.filter(user=request.user).values()
+            
+            print(list_of_product)
+            for x in list_of_product:
+                print(cd['code'])
+                print(cd['count'])
+                for temp in cd:
+                    print("7777777777777777777777777777")
+                    #print(temp[code])
+                    print(temp)
+                    #print(type(temp['code']))
+                    #print(list(x.values())[1])
+                    #print(type(list(x.values())[1]))
+                    #if type(list(x.values())[1]) == type(temp['code']):
+                    #    list(x.values())[2] = temp['count']
+                    #    list(x.values())[2].save()                
+        else:
+            messages.error(request,"please login ,tryagain","failed")
+            return redirect('/')
+        return redirect('/users/cart/')
+    
+                      
+
         
+
+#در این قسمت بعد از دیدن محصولات و بخش ادیت وارد صفحه نهایی کردن خرید میشود که بعد از این صفحه وارد صفحه پرداخت میشود
+@csrf_exempt
+@require_http_methods(["GET","POST"])
+def Final_v(request):
+    #زمانی که کاربر گزینه نهایی کردن خرید را میزند
+    if request.method == "GET":
+        if request.user.is_authenticated:
+            products = Cart.objects.filter(user=request.user).values()
+            TotalPrice = 0
+            TotalProduct = []
+            PricePerGood = []
+            print("nima1")
+            print(products)
+            #در این حلقه قیمت نهایی و
+            for x in products:
+                print(x)
+                print("nima2")
+                TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))
+                print("nima3")
+                temp = Product.objects.get(uniqe_code=list(x.values())[1])
+                print("nima4")
+                price = temp.price
+                print("nima5")
+                price *= list(x.values())[2]
+                print("nima6")
+                print(price)
+                PricePerGood.append(price)
+                print("nima7")
+                TotalPrice += price
+                print("nima8")
+                print(TotalPrice)
+            #tempuser = User.objects.get()
+            print("nimaaa")
+            #این قسمت برای گرفتن آدرس کاربر میباشد
+            phonemail = str(request.user)
+            print("nimaaa")
+            print(phonemail)
+            tempuser = ""
+            if phonemail.isdigit():
+                print("nimaaa")
+                tempuser = User.objects.get(phone_number = int(phonemail))
+            else:
+                print("nimaaa22")
+                tempuser = User.objects.get(email = phonemail)
+            TotalAddress = tempuser.address
+            
+            intaial_data ={
+                'count'    : TotalAddress
+                          }
+            form = FinalAddresForm(initial=intaial_data)
+                
+            
+            #قیمت نهایی +آدرس  مخاطب + لیست تمام محصولات+ قیمت نهایی هر محصول
+            context = {'price':TotalPrice,'address':form,'product':TotalProduct,'PricePerGood':PricePerGood,'products':products}
+            return render(request,'users/FinalInspectionOfGoods.html/',context=context)
+        
+        else:
+            messages.error(request,"please login ,tryagain","failed")
+            return redirect('/users/final/')
+    #این برای زمانی است که کاربر گزینه پرداخت را میزند
+    elif request.method == "POST":
+        #در این قسمت زمانی که کاربر گزینه پرداخت را میزند به این قسمت می آید و به خاطر اینکه آدرس را
+        #میگیریم از دوباره 
+        #پس متد ما از نوع پست خواهد بود و در این قسمت باید آدرسمون از دوباره سیو شود
+        if request.user.is_authenticated:
+            ######################################################
+            #آدرس کاربر ذخیره شود 
+            form = FinalAddresForm(request.POST)
+            if form.is_valid():
+                print("1")
+                cd = form.cleaned_data
+                print(cd)
+                phonemail = str(request.user)
+                print("1111111111111111111111111111111")
+                print(type(phonemail))
+                if phonemail.isdigit():
+                    user = User.objects.get(phone_number = int(phonemail))
+                else:
+                    user = User.objects.get(email = phonemail)
+                user.address = cd['Address']
+                user.save()
+                ###############################################
+                #قیمت نهایی محاسبه شود
+                products = Cart.objects.filter(user=request.user).values()
+                print(products)
+                print("nima7898")
+                user = str(request.user)
+                TotalPrice = 0
+                for x in products:
+                    print(x)
+                    print("nima2")
+                    #TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))
+                    print("nima3")
+                    temp = Product.objects.get(uniqe_code=list(x.values())[1])
+                    print("nima4")
+                    price = temp.price
+                    print("nima5")
+                    price *= list(x.values())[2]
+                    print("nima6")
+                    print(price)
+                    #PricePerGood.append(price)
+                    print("nima7")
+                    TotalPrice += price
+                    print("nima8")
+                    print(TotalPrice)
+                    #tempuser = User.objects.get()
+                ##########################################################
+                #به درگاه بانکی منتقل میشود و کار های حسابرسی انجام مشود 
+                #حالا یا از طریق بانک یا از طریق خودمون به تابع 
+                #ok_Record
+                #منتقل میشوددر اپ 
+                #order
+                #در این قسمت اطلاعات مربوط به ثبت سفارش به تابع مورد نظر ارسال مشود
+                #context = {'products':products,'price':TotalPrice,'user':user}
+                #request.session['products'] = products
+                #request.session['price'] = TotalPrice
+                #request.session['user'] = user
+                #print(request.session.get('price'))
+                #print(request.session.get('user'))
+                print("nima8")
+                return redirect('/order/register/')               
+            else:
+                messages.error(request,"please login ,tryagain","failed")
+                return redirect('/')  
+        else:
+            messages.error(request,"please login ,tryagain","failed")
+            return redirect('/users/final/')    
+    
+             
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def About_v(request):
+    if request.method == "GET":
+        Address = "استان گلستان - شهرستان علی آباد کتول - خیابان پاسداران - پاسداران 50 - قدس 5"
+        PhoneNumber = "09115147898"
+        Email = "nimadfm1400@gmail.com"
+        Description = "توضیحاتی درباره این شرکت و محصولات و غیره"
+        context = {"address":Address,"phone":PhoneNumber,'email':Email,'des':Description}
+        return render(request,'users/about.html',context=context)
