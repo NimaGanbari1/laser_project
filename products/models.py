@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -67,7 +67,7 @@ class Post_File(models.Model):
         return self.title    
     
 class Comment(models.Model):
-    user = models.ForeignKey(to=User, on_delete= models.PROTECT)
+    user = models.ForeignKey(to=User, on_delete= models.CASCADE)
     Product = models.ForeignKey(to=Product,related_name='comments', on_delete=models.CASCADE)
     text = models.TextField(max_length=2048)
     is_approved = models.BooleanField(default=True)

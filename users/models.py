@@ -1,6 +1,6 @@
 import random
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.core import validators
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, send_mail
@@ -76,8 +76,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         help_text=_(
             'Required. 32 characters or fewer. Letters, digits and . _ only.'),
-        validators=[validators.RegexValidator(
-            r'^[a-zA-Z0-9][a-zA-Z0-9_\.]+$', _('Enter a valid username starting with a-z.'))],
+        #validators=[validators.RegexValidator(
+        #    r'^[a-zA-Z0-9][a-zA-Z0-9_\.]+$', _('Enter a valid username starting with a-z.'))],
         error_messages={
             'unique': _("A user with that username already exists."),
             'validators': _('invalid'),

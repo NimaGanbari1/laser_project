@@ -35,6 +35,20 @@ def index(request,page):
 
     return render(request, 'products/indexProduction.html', { 'users': users })
 
+def ProductSearch(request):
+    if request.method == "GET":
+        title = request.GET.get('q')
+        print(title)
+        context = {}
+        posts = None
+        try:
+            posts = Product.objects.filter(title=title)
+        except Product.DoesNotExist:
+            return render(request,'products/ProductionList.html',context=context)
+        p = Paginator(posts,per_page=3)
+        context = {'posts':p.object_list}
+        return render(request,'products/ProductionList.html',context=context)
+        
 
 #جزئیات مربوط به یک محصول را برمیگرداند 
 def ProductDetail(request,id):
@@ -55,12 +69,30 @@ def ProductDetail(request,id):
         print(form['count'])
         print(form['user'])
         #در این قسمت کامنت های این محصول نمایش داده میشود
-        ListOfComment = Comment.objects.filter(Product=post)
+        try:
+            ListOfComment = Comment.objects.filter(Product=post).values()
+        except Comment.DoesNotExist:
+            return HttpResponse({'dont have comment':'not found'})
+        ListOfUserCom = []
+        try:
+            for temp in ListOfComment:
+                print("11111111111111111111111111111111111111111")
+                print(temp.values())
+                temp1 = User.objects.get(id=list(temp.values())[1])
+                print(temp1.get_full_name())
+                ListOfUserCom.append(temp1.get_full_name())
+        except User.DoesNotExist:
+            return HttpResponse({'dont have comment':'not found'})
+            
+        #در ادامه یک گزینه برای حذف کردن کامنت خود در بخش کامنت ها بگذاریم
+        print(ListOfUserCom)
+        print("9999999999999999----------------99999999999999999")
+        print(ListOfComment)
         intaial_data1 ={
         'Product': post
         }
         CommentForm = CreateCommentForm(initial=intaial_data1)
-        context = {'post':post,'form':form,'comment':ListOfComment,'comform':CommentForm}
+        context = {'post':post,'form':form,'comment':ListOfComment,'comform':CommentForm,'users':ListOfUserCom}
         return render(request,'products/ProductDetail.html',context=context)
     #زمانی که مخاطب دکمه سابمیت را زد در صفحه جزئیات محصولات به این قسمت هدایت میشود
     else:
