@@ -11,13 +11,13 @@ from email.message import EmailMessage
 import smtplib
 from secrets import compare_digest
 #import mailtrap as mt
-from .forms import RegisterFrom,createUserForm,UserLoginForm,EditCartForm,FinalAddresForm
+from .forms import RegisterFrom,createUserForm,UserLoginForm,EditCartForm,FinalAddresForm,ProfileForm,SetPassFrom,SetCodeForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from .models import Cart
 from products.models import Product
 #from products.forms import CreateCartForm
-
+from tkinter import messagebox
 
 def send_mail(email_r, code_r):
     EMAIL_HOST = 'smtp.gmail.com'
@@ -152,11 +152,13 @@ def logout_v(request):
     messages.success(request,'logged out successfully')
     return redirect('/')
              
-#برای زمانی هست که کاربر روی سبد خرید خود را میزند و می خواهد سبد خرید خود را ببیند
+
 @csrf_exempt
 @require_http_methods(["GET","POST"]) 
 def Cart_v(request):
     print("1")
+    #بخش گت مشکل ندارد ولی بخش صفحه اچ تی ام ال با بخض پست مشکل دارد
+    #برای زمانی هست که کاربر روی سبد خرید خود را میزند و می خواهد سبد خرید خود را ببیند 
     if request.method == 'GET':
         print("1")
         if request.user.is_authenticated:
@@ -197,9 +199,7 @@ def Cart_v(request):
                 ListForm.append(form)
                 print(ListForm[0]['code'])
             print("1")
-            
-            
-            #لیست محصولات بر اساس تعداد و کد محصول + لیست محصولات بر اساس آبجکت
+            #لیست محصولات بر اساس ابجکت+لیست فرم ها +اگر لیست خالی باشد            
             context = {'products2':products2,'ListForm':ListForm,'temp':temp1}
             return render(request,"users/cart.html",context=context)
         else:
@@ -208,13 +208,18 @@ def Cart_v(request):
     #این برای زمانی هست که کاربر تغییراتی در محصولات ایجاد میکند و بر روی گزینه اعمال تغییرات کلیک میکند
     #این قسمت از تابع هم باید زمانی درست شود که اطلاعات از فرم صحیح دریافت شده باشدکه الان اطلاعات درست دریافت نمشود
     elif request.method == 'POST':
+        #در این قسمت تعدادی فرم به سمت سرور فرستاده میشود که باید اطلاعات همه آنها را ذخیره کرد
         print("1")
-        form = EditCartForm(request.POST)
+        forms = EditCartForm(request.POST)
+        #form1 = request.POST.get()
         print("1")
-        if form.is_valid():
+        for x in forms:
+            print(x)
+        if forms.is_valid():
+            print(forms)
             print("1")
-            cd = form.cleaned_data
-            #print(cd)
+            cd = forms.cleaned_data
+            print(cd)
             print(len(cd))
             for x in cd:
                 print(x)
@@ -231,9 +236,15 @@ def Cart_v(request):
                     #print(type(temp['code']))
                     #print(list(x.values())[1])
                     #print(type(list(x.values())[1]))
-                    #if type(list(x.values())[1]) == type(temp['code']):
-                    #    list(x.values())[2] = temp['count']
-                    #    list(x.values())[2].save()                
+                    print(list(x.values())[1])
+                    print(type(list(x.values())[1]))
+                    #print(temp['code']['count'])
+                    #print(type(temp['code']))
+                    if int(list(x.values())[1]) == int(temp['code']):
+                        list(x.values())[2] = temp['count']
+                        list(x.values())[2].save() 
+            messages.success(request,'logged out successfully')
+            return redirect('/users/cart/')               
         else:
             messages.error(request,"please login ,tryagain","failed")
             return redirect('/')
@@ -383,3 +394,167 @@ def About_v(request):
         Description = "توضیحاتی درباره این شرکت و محصولات و غیره"
         context = {"address":Address,"phone":PhoneNumber,'email':Email,'des':Description}
         return render(request,'users/about.html',context=context)
+    
+    
+    
+@csrf_exempt
+@require_http_methods(["GET","POST"])    
+def Profile_v(request):
+    if request.method == "GET":
+        #زمانی است که کاربر بر روی گزینه پروفایل کلیک میکند و به این صفحه منتقل میشود
+        if request.user.is_authenticated:
+            ########################################################
+            #کاربر رو دریافت میکنیم
+            phonemail = str(request.user)
+            print("nimaaa111")
+            print(phonemail)
+            tempuser = ""
+            if phonemail.isdigit():
+                print("nimaaa222")
+                tempuser = User.objects.get(phone_number = int(phonemail))
+            else:
+                print("nimaaa333")
+                tempuser = User.objects.get(email = phonemail)
+            #########################################################
+            #tempuser = User.objects.get(id = request.user.id)
+            #اطلاعات کاربر رو به صورت پیش فرض ست میکنیم
+            intaial_data ={
+                'first_name'    : tempuser.first_name,
+                'last_name'     : tempuser.last_name,
+                'avatar'        : tempuser.avatar,
+                'address'       : tempuser.address
+            }
+            form = ProfileForm(initial=intaial_data)
+            context = {'form':form}
+            return render(request,'users/profile.html',context=context)
+            
+        else:
+            messages.error(request,"please login ,tryagain","failed")
+            return redirect('/users/login/')  
+    elif request.method == "POST":
+        #برای زمانی است که کاربر اطلاعات پروفایل خود را ادیت کرده است
+        if request.user.is_authenticated:
+            ######################################################
+            #آدرس کاربر ذخیره شود 
+            form = ProfileForm(request.POST, request.FILES)
+            print(form['first_name'])
+            print(form['last_name'])
+            print(form['avatar'])
+            print(form['address'])
+            print("1212212121212")
+            #print(form)
+            user = User.objects.get(id=request.user.id)
+            if form.is_valid():
+                print("1")
+                cd = form.cleaned_data
+                print("1212212121212111111111111111111111111111111")
+                tempuser = User.objects.get(id = request.user.id)
+                print(cd['first_name'])
+                tempuser.first_name = cd['first_name']
+                tempuser.last_name = cd['last_name']
+                tempuser.avatar = cd['avatar']
+                print(cd['avatar'])
+                tempuser.address = cd['address']
+                tempuser.save()
+                #form.save()
+                messages.success(request,"Your account information has been saved successfully")
+                return redirect('/users/profile/')
+            else:
+                messages.error(request,"data is not valid ,tryagain","failed")
+                return redirect('/users/profile/')
+        else:
+            messages.error(request,"please login ,tryagain","failed")
+            return redirect('/users/profile/')    
+        
+
+
+def delete_v(request):
+    
+    response = messagebox.askyesno("please no", "are you sure?")
+    if response == 0:
+        messages.success(request,"The operation was canceled")
+        return redirect('/users/profile/')
+    User.objects.get(id = request.user.id).delete()
+    messages.success(request,"Your account information has been saved successfully")
+    return redirect('/')
+
+
+
+def ForgotPassword_v(request):
+    if request.method == "GET":
+        #در این قسمت یک فرم که شماره یا ایمیل را بگیرد نمایش داده میشود
+        form = RegisterFrom()
+        return render(request,"users/forget1.html/",{'form':form})
+    else:
+        #در این قسمت یک کد برای این شماره یا ایمیل فرستاده میشود 
+        form = RegisterFrom(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            phonemail = cd['phonemail']
+            print(phonemail)
+            try:
+                if phonemail.isdigit():
+                    user = User.objects.get(phone_number=phonemail)
+                else:
+                    user = User.objects.get(email=phonemail)
+            except User.DoesNotExist:
+                return HttpResponse({'this phone number is not alredy registered': 'The code send to your phone. Please enter it.'})
+            code_random = random.randint(10000,99999)
+            print(code_random)
+            if phonemail.isdigit():
+                cache.set(str(phonemail),str(code_random),3*60)
+                #send sms
+                response = redirect('/users/setcode/')
+                return response
+                #return HttpResponse({'title2': 'sms sabt'})
+            else:
+                cache.set(str(phonemail),str(code_random),3*60)
+                send_mail(phonemail,code_random)
+                response = redirect('/users/setcode/')
+                return response
+
+def SetCode_v(request):
+    if request.method == "GET":
+        form = SetCodeForm()
+        return render(request,"users/forget2.html/",{'form':form})
+        
+    else:
+        form = SetCodeForm(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            phonemail = cd['phonemail']
+            code_rand = cd['code']
+            print(code_rand)
+            code_cache = cache.get(str(phonemail))
+            print(code_cache)
+            if not compare_digest(code_cache,code_rand):
+                return HttpResponse({'title2':'The entered code is invalid'})
+            print(phonemail)
+            return redirect("/users/setpass/")
+
+def SetPassword_v(request):
+    if request.method == "GET":
+        form = SetPassFrom()
+        return render(request,"users/forget1.html/",{'form':form})
+        #در این قسمت یک فرم نمایش داده میشود که یک شماره یا ایمیل و دو تا پسورد میخواهد
+        pass
+    else:
+        #در این قسمت پسورد ها را چک کرده که مثل هم باشند و این پسورد برای کاربر ذخیره شود و به صفحه لاگین ریدایرکت شود
+        form = SetPassFrom(request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
+            phonemail = cd['phonemail']
+            password1 = cd['password1']
+            password2 = cd['password2']
+            if not compare_digest(password1,password2):
+                return HttpResponse({'The passwords do not match':'The entered code is invalid'})
+            if phonemail.isdigit():
+                user = User.objects.get(phone_number=phonemail)
+            else:
+                user = User.objects.get(email=phonemail)
+            user.set_password(f"{password1}")
+            user.save()
+            return redirect("/users/login/")
+
+
+

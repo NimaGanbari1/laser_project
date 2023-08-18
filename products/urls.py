@@ -7,5 +7,6 @@ urlpatterns = [
     path('index/<int:page>/',index),
     path('indexdetail/<int:id>/',ProductDetail),
     path('comment/',SetComment),
+    path('listsearch/',ProductSearch),
     path('',HomePage),
 ]

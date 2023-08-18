@@ -1,6 +1,6 @@
 from django.db import models
 import random
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 User = get_user_model()
 from django_mysql.models import ListCharField
@@ -26,6 +26,19 @@ class Order(models.Model):
         STATUS_CANCELED : _('payment canceled by user.'),
         STATUS_REFUNDED :_('this payment has beed refunded')
     }
+    
+    STATUS_RECORD = 0
+    STATUS_CONSTRUCTING = 10
+    STATUS_MADE = 20
+    STATUS_TRANSPORTATION = 30
+    STATUS_CANCEL = 31
+    STATUS_CHOICE = (
+        (STATUS_RECORD,_('RECORD')),
+        (STATUS_CONSTRUCTING,_('CONSTRUCTING')),
+        (STATUS_MADE,_('MADE')),
+        (STATUS_TRANSPORTATION,_('TRANSPORTATION')),
+        (STATUS_CANCEL,_('CANCEL'))
+    )
     ProductCodes = ListCharField(
         base_field=models.CharField(_("code"), max_length=7),
         size=15,
@@ -39,7 +52,8 @@ class Order(models.Model):
     Price = models.BigIntegerField()
     user = models.ForeignKey(to=User,related_name='Orders', on_delete=models.CASCADE)
     Address = models.TextField()
-    status = models.PositiveSmallIntegerField(verbose_name=_('status'),choices=STATUS_CHOICES,default=STATUS_VOID)
+    status_pay = models.PositiveSmallIntegerField(verbose_name=_('pay status'),choices=STATUS_CHOICES,default=STATUS_VOID)
+    status_build = models.PositiveSmallIntegerField(verbose_name=_('build status'),choices=STATUS_CHOICE,default=STATUS_RECORD)
     consumed_code = models.PositiveIntegerField(_("consumed refrence code"),null =True,db_index = True)
     create_time = models.DateTimeField(
         verbose_name=_("create time"), auto_now_add=True)

@@ -13,6 +13,9 @@
 <body>
     <main>
         <h1>Welcome to My Website</h1>
+        {%if not posts%}
+            <p>همچین پستی وجود ندارد</p> 
+        {%endif%}
         {% for x in posts %}
         <!--اگر علامت اسلش را قبل از پروداکت نگذاریم باعث میشود که این آدرس جدید به آدرس قبلی کانکت شود و به مشکل میخوریم-->
         <p><a href="/products/indexdetail/{{ x.uniqe_code }}/">title:{{x.title}}</a></p>
@@ -23,7 +26,8 @@
         <p>files: {{x.files}}</p>
         <hr>
         {%endfor%}
-            
+        <button><p><a href="/">بازگشت</a></p></button>
+ 
     </main>
 </body>
 

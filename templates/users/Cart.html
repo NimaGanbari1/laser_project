@@ -42,6 +42,7 @@
             <!--{{ListForm}}-->
             {% for x in ListForm %}
                 {{x.as_p}}
+                <input type="hidden" value="{{x.data}}">
             <!--<p>count: {{x.count}}</p>-->
             <!--<p>code: {{x.code}}</p>-->
             <!--<label for="code">Code:</label>
@@ -49,7 +50,7 @@
             {%endfor%}
 
             <hr>
-            <input type="submit" value="بررسی تغییرات">
+            <button type="submit">Submit</button>
         </form>
         
                 

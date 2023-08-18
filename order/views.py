@@ -80,7 +80,7 @@ def Ok_Record(request):
             ##################################
             
             Order.objects.create(ProductCodes=ProductCodes,ProductCounts=ProductCounts,Price=TotalPrice,user=tempuser,Address=tempuser.address,
-                                 consumed_code=random.randint(10000,99999))
+                                 consumed_code=random.randint(10000,99999),status_pay=10)
             #حالا تمام سفارشات مربوز به 
             #cart
             #که مربوط به این کاربر میباشد باید حذف شود
