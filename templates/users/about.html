@@ -14,14 +14,63 @@
     <main>
         <h1>Welcome to My Website</h1>
         <p>Address: {{address}}</p>
+        <p><a href="https://goo.gl/maps/N35SCzAEVC3BTjDv8">Google Map Link</a></p>
         <!--بهتره که شماره تلفن و ایمیل چوری طراحی شوند که وقتی روی آنها کلیک کردیم در 
             cliboard
             کپی شوند-->
-        <p>Phone Number: {{phone}}</p>
-        <p>E-mail: {{email}}</p>
-        <p>Description: {{des}}</p>
         
-            
+        <div class="copy-link">
+            <input type="text" class="copy-link-input" value="{{phone}}" readonly>
+            <button type="button" class="copy-link-button">
+              <span class="material-icons">copy</span>
+            </button>
+        </div>
+        <script>
+            document.querySelectorAll(".copy-link").forEach((copyLinkParent) => {
+                const inputField = copyLinkParent.querySelector(".copy-link-input");
+                const copyButton = copyLinkParent.querySelector(".copy-link-button");
+                const text = inputField.value;
+              
+                inputField.addEventListener("focus", () => inputField.select());
+              
+                copyButton.addEventListener("click", () => {
+                  inputField.select();
+                  navigator.clipboard.writeText(text);
+              
+                  inputField.value = "Copied!";
+                  setTimeout(() => (inputField.value = text), 2000);
+                });
+              });                 
+        </script>
+        
+        <div class="copy-link">
+            <input type="text" class="copy-link-input" value="{{email}}" readonly>
+            <button type="button" class="copy-link-button">
+              <span class="material-icons">copy</span>
+            </button>
+        </div>
+        <script>
+            document.querySelectorAll(".copy-link").forEach((copyLinkParent) => {
+                const inputField = copyLinkParent.querySelector(".copy-link-input");
+                const copyButton = copyLinkParent.querySelector(".copy-link-button");
+                const text = inputField.value;
+              
+                inputField.addEventListener("focus", () => inputField.select());
+              
+                copyButton.addEventListener("click", () => {
+                  inputField.select();
+                  navigator.clipboard.writeText(text);
+              
+                  inputField.value = "Copied!";
+                  setTimeout(() => (inputField.value = text), 2000);
+                });
+              });                 
+        </script>
+        
+        <p>Description: {{des}}</p>
+        <p><a href="http://t.me/NiwaGhanbari">کانال تلگرام</a></p>
+        <button><p><a href="/">بازگشت</a></p></button>
+
     </main>
 </body>
 

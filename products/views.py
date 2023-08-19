@@ -16,7 +16,8 @@ def ProductionList(request):
         posts = Product.objects.all()
         p = Paginator(posts,per_page=3)
         context = {'posts':p.object_list}
-        return render(request,'products/ProductionList.html',context=context)
+        return p.object_list
+        #return render(request,'products/ProductionList.html',context=context)
     else:
         return HttpResponse({"nima":"noooooo"})
 
@@ -54,11 +55,12 @@ def ProductSearch(request):
 def ProductDetail(request,id):
     #وقتی جزئیات محصول رو زد
     if request.method == "GET":
+        post = None
         try:
             post = Product.objects.get(uniqe_code=id)
         except Product.DoesNotExist:
             return HttpResponse({'title':'not found'})
-        
+        #ditemp = list(list(post.categories.values())[0].values())[1]
         intaial_data ={
         'uniqeCode': id,
         'user': request.user,
@@ -162,7 +164,28 @@ def SetComment(request):
                 messages.error(request,"First, log in to your account","failed")
                 print("222")
                 return redirect('/users/register')
-                
+
+def TypeCategory(request,type):
+    print("1111111111111111111111111")
+    Products = None
+    if type == None or type == "None":
+        Products = Product.objects.all()
+    else:
+        print("22222222222222222")
+        temp = Category.objects.get(title=type)
+        print("3333333333333333333")
+        print(temp.is_enable)
+        Products = Product.objects.filter(categories = temp.id)
+    print("1111111111111111111111111")
+    return Products            
 
 def HomePage(request):
-    return render(request,'homepage.html')
+    type = request.GET.get('category')
+    print(type)
+    Production = TypeCategory(request,type)
+    print("44444444444444444")
+    print(Production)
+    categories = Category.objects.all()
+    #p = ProductionList(request)
+    context = {'categories':categories,'posts':Production}
+    return render(request,'homepage.html',context=context)
