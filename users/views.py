@@ -18,6 +18,9 @@ from .models import Cart
 from products.models import Product
 #from products.forms import CreateCartForm
 from tkinter import messagebox
+from kavenegar import *
+import requests
+import ghasedakpack
 
 def send_mail(email_r, code_r):
     EMAIL_HOST = 'smtp.gmail.com'
@@ -34,6 +37,19 @@ def send_mail(email_r, code_r):
         server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
         server.send_message(msg)
 
+
+def send_sms(phonenumber,massage):    
+    #url = "https://api.kavenegar.com/v1/69716B377071796B6D7A3152334D57672F73305634686277682B42544570436C7A527064576F692B5639733D/sms/send.json"
+    #params = {
+    #        'receptor': phonenumber,#multiple mobile number, split by comma
+    #        'message': massage,
+    #    } 
+    #temp = requests.post(url,data=params)
+    #print(temp)
+    sms = ghasedakpack.Ghasedak("41dbb4427c2ba8a6eeb0e62df5998d499b35e1f1c0ebb1ac124a42a81429cc75")
+    temp = sms.send({'message':massage, 'receptor' : phonenumber, 'linenumber': '30005088' })
+    print(temp)
+    
 #برای رجیستر کردن ابتدا وارد این صفحه میشود و با زدن دکمه تایید برای او کد ارسال میشود و به تابع پایینی منتقل میشود
 @csrf_exempt
 @require_http_methods(["POST","GET"])
@@ -58,7 +74,7 @@ def register_v(request):
             except User.DoesNotExist:
                 if phonemail.isdigit():
                     cache.set(str(phonemail),str(code_random),3*60)
-                    #send sms
+                    send_sms(phonenumber=phonemail,massage=code_random)
                     response = redirect('/users/create/')
                     return response
                     #return HttpResponse({'title2': 'sms sabt'})

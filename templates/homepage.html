@@ -1,3 +1,13 @@
+<!--این صفحه اصلی سایت میباشد
+    1- ارم و اسم سایت 
+    2- سرچ بار بر اساس محصولات
+    3- جستجو بر اساس دسته بندی
+    4-نمایش محصولات به صورت صفحه بندی 
+    5-درباره ما
+    6-آیکون سبد خرید 
+    7- اسم یا شماره تلفن یا ایمیل نمایش داده شوددر قسمت گوشه بالا
+    8-آیکون پروفایل
+    -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -19,14 +29,8 @@
         {%if request.user.first_name %}
         <p>{{ request.user.get_full_name }}</p>
         {%endif%}
-        <form action="/products/listsearch/" method="get">
-            <input type="text" id="search" name="q">
-            <button type="submit">جستجو</button>
-        </form>
         <p><a href="admin/">ادمین</a></p>
         <p><a href="users/about/">درباره ما</a></p>
-        <p><a href="products/list/">محصولات</a></p>
-        <p><a href="http://t.me/NiwaGhanbari">کانال تلگرام</a></p>
         {%if not request.user.is_authenticated %}
             <a href="users/register">ثبت نام</a>
             <p><a href="users/login/">ورود</a></p>
@@ -37,6 +41,40 @@
             <p><a href="/users/logout/">خروج از حساب کاربری</a></p>
         {%endif%}
 
+        <form action="/products/listsearch/" method="get">
+                <input type="text" id="search" name="q">
+                <button type="submit">جستجو</button>     
+        </form>
+
+        <form action="/" method="get">
+            <label for="category">دسته بندی:</label>
+            <select id="category" name="category">
+                <option value="None">همه</option>
+                {% for x in categories %}  
+                    <option value="{{x.title}}">{{x.title}}</option>
+                {%endfor%}
+            </select>
+            <button type="submit">جستجو</button>
+        </form>
+
+        <hr>
+        <hr>
+        <hr>
+
+        {%if not posts%}
+            <p>همچین پستی وجود ندارد</p> 
+        {%endif%}
+        {% for x in posts %}
+        <!--اگر علامت اسلش را قبل از پروداکت نگذاریم باعث میشود که این آدرس جدید به آدرس قبلی کانکت شود و به مشکل میخوریم-->
+        <p><a href="/products/indexdetail/{{ x.uniqe_code }}/">title:{{x.title}}</a></p>
+        <p>code: {{ x.uniqe_code }}</p>
+        <p>caption: {{ x.caption }}</p>
+        <p>price: {{x.price}}</p>
+        <p>categories: {{x.categories}}</p>
+        <p>files: {{x.files}}</p>
+        <hr>
+        {%endfor%}
+ 
         
     </main>
 </body>

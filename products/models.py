@@ -29,7 +29,7 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True,null=True)
     is_enable = models.BooleanField(default=True,null=True)
     uniqe_code = models.IntegerField(verbose_name=_('uniqe_code'),unique=True)
-    categories = models.ManyToManyField('Category',verbose_name=_("categories"),blank=True)
+    categories = models.ManyToManyField('Category',related_name='categor',verbose_name=_("categories"),blank=True)
     create_time = models.DateTimeField(
         verbose_name=_("create time"), auto_now_add=True)
     update_time = models.DateTimeField(
