@@ -1,5 +1,7 @@
 from django.urls import path
 from.views import register_v,create_user_v,login_v,logout_v,Cart_v,Final_v,About_v,Profile_v,delete_v,ForgotPassword_v,SetPassword_v,SetCode_v
+from azbankgateways.urls import az_bank_gateways_urls
+
 urlpatterns = [
     path('register/',register_v,name='user-register'),
     path('create/',create_user_v,name='user-create'),
@@ -13,4 +15,5 @@ urlpatterns = [
     path('forget/',ForgotPassword_v,name="forget-password"),
     path('setpass/',SetPassword_v,name="set-password"),
     path('setcode/',SetCode_v,name="set-code"),
+    path('bankgateways/', az_bank_gateways_urls()),
 ]

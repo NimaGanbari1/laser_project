@@ -39,14 +39,14 @@
                 </tr>
                 <hr>
         {% endfor %}
-
-        <form action="/users/final/" method="post">
+        <p>Total Price: {{ price }}</p>
+        <form action="" method="post">
             {% csrf_token %}
             <p>Address: {{ address }}</p>
             <input type="submit" value="صفحه پرداخت ">
         </form>
         
-
+        <a href="/users/cart/"><button type="button">بازگشت</button></a>
     </main>
 </body>
 

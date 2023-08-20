@@ -8,9 +8,38 @@ User = get_user_model()
 from .models import Order
 import random
 from django.contrib import messages
-def ReqForCheck():
-    #در این قسمت باید به بانک درخواست داده شود که واریز صحیح بوده است یا خیر؟
-    return 10
+import logging
+
+from django.http import HttpResponse, Http404
+from django.urls import reverse
+
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+
+
+def callback_gateway_view(request):
+    tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
+    print(tracking_code)
+    if not tracking_code:
+        print("این لینک معتبر نیست.")
+        return 0
+
+    try:
+        bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
+    except bank_models.Bank.DoesNotExist:
+        print("این لینک معتبر نیست2.")
+        return 0
+
+    # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
+    if bank_record.is_success:
+        # پرداخت با موفقیت انجام پذیرفته است و بانک تایید کرده است.
+        # می توانید کاربر را به صفحه نتیجه هدایت کنید یا نتیجه را نمایش دهید.
+        print("پرداخت با موفقیت انجام شد.")
+        return 10
+
+    # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
+    print("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.")
+    return 20
+
 
 @csrf_exempt
 @require_http_methods(["GET","POST"])
@@ -28,10 +57,15 @@ def Ok_Record(request):
         #print(request.session.get('price'))
         #print(request.POST['price'])
         print("11")
-        status = ReqForCheck()
+        status = callback_gateway_view(request)
+        context = None
         if status == 0:
-            pass
-        #void
+            #اگر لینک بازگرداننده معتبر نباشد
+            messages.error(request,"این لینک معتبر نیست.","failed")
+            context = {
+                "status":"این لینک معتبر نیست."
+            }
+        #void 
         elif status == 10:
             pass
             #یک آبجکت میسازیم و ذخیره میکنیم و به ادمین یک پیغام میدهیم
@@ -44,55 +78,46 @@ def Ok_Record(request):
                 ProductCounts.append(str(list(x.values())[2]))
             ###############################################
             #قیمت نهایی محاسبه شود
-            print(products)
-            print("nima7898")
             user = str(request.user)
             TotalPrice = 0
             for x in products:
-                print(x)
-                print("nima2")
-                #TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))
-                print("nima3")
-                temp = Product.objects.get(uniqe_code=list(x.values())[1])
-                print("nima4")
-                price = temp.price
-                print("nima5")
-                price *= list(x.values())[2]
-                print("nima6")
-                print(price)
+                #TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))           
+                temp = Product.objects.get(uniqe_code=list(x.values())[1])               
+                price = temp.price             
+                price *= list(x.values())[2]       
                 #PricePerGood.append(price)
-                print("nima7")
                 TotalPrice += price
-                print("nima8")
-                print(TotalPrice)
                 #tempuser = User.objects.get()
             ##########################################################
             #اینم برای یوزر
             phonemail = str(request.user)
-            print("nimaaa")
-            print(phonemail)
             tempuser = ''
             if phonemail.isdigit():
-                print("nimaaa")
                 tempuser = User.objects.get(phone_number = int(phonemail))
             else:
-                print("nimaaa22")
                 tempuser = User.objects.get(email = phonemail)
             ##################################
             
-            Order.objects.create(ProductCodes=ProductCodes,ProductCounts=ProductCounts,Price=TotalPrice,user=tempuser,Address=tempuser.address,
+            ortemp = Order.objects.create(ProductCodes=ProductCodes,ProductCounts=ProductCounts,Price=TotalPrice,user=tempuser,Address=tempuser.address,
                                  consumed_code=random.randint(10000,99999),status_pay=10)
             #حالا تمام سفارشات مربوز به 
             #cart
             #که مربوط به این کاربر میباشد باید حذف شود
+            print("99999999999999888888888888887777777777777")
             products = Cart.objects.filter(user=request.user).delete()
             
             #به ادمین یک پیام جهت سفارش جدید زده میشود در این قسمت
-            messages.success(request,"Your order has been successfully placed")
-            return redirect('/')
+            #messages.success(request,"Your order has been successfully placed")
+            context = {
+                "status":"Payment was successful"
+            }
         #pay
         elif status == 20:
-            pass
+            #به هر دلیلی که پرداخت انجام نشد به این قسمت می آید 
+            messages.error(request,"پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.","failed")
+            context = {
+                "status":"Payment failed"
+            }
         #error
         elif status == 30:
             pass
@@ -100,6 +125,7 @@ def Ok_Record(request):
         elif status == 31:
             pass
         #refunded
-        return redirect('/') 
-    return redirect('/')
+        return render(request,"order/final.html/",context=context) 
+    else:
+        return redirect('/')
     
