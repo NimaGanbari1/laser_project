@@ -26,8 +26,9 @@ class OrderAdmin(admin.ModelAdmin):
     #    return False
     #def has_change_permission(self, request,obj=None):
     #    return False
-    def has_delete_permission(self, request,obj=None):
-        return False
+    #موقتا بسته شود پایینی 
+    #def has_delete_permission(self, request,obj=None):
+    #    return False
     readonly_fields = ('ProductCodes','ProductCounts','Price','consumed_code','user','create_time','Address','status_pay')
 
 
