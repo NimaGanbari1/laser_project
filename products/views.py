@@ -78,18 +78,12 @@ def ProductDetail(request,id):
         ListOfUserCom = []
         try:
             for temp in ListOfComment:
-                print("11111111111111111111111111111111111111111")
-                print(temp.values())
                 temp1 = User.objects.get(id=list(temp.values())[1])
-                print(temp1.get_full_name())
                 ListOfUserCom.append(temp1.get_full_name())
         except User.DoesNotExist:
             return HttpResponse({'dont have comment':'not found'})
             
         #در ادامه یک گزینه برای حذف کردن کامنت خود در بخش کامنت ها بگذاریم
-        print(ListOfUserCom)
-        print("9999999999999999----------------99999999999999999")
-        print(ListOfComment)
         intaial_data1 ={
         'Product': post
         }
@@ -98,7 +92,6 @@ def ProductDetail(request,id):
         return render(request,'products/ProductDetail.html',context=context)
     #زمانی که مخاطب دکمه سابمیت را زد در صفحه جزئیات محصولات به این قسمت هدایت میشود
     else:
-        print("nima1")
         if request.user.is_authenticated:
             print("nima1")
             form = CreateCartForm(request.POST)
