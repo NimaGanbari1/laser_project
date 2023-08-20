@@ -10,6 +10,7 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('order/', include('order.urls')),
     path('',include('products.urls')),
+    path('captcha',include("captcha.urls"))
     
 ]
 
