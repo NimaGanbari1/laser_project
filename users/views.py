@@ -21,6 +21,10 @@ from tkinter import messagebox
 from kavenegar import *
 import requests
 import ghasedakpack
+import logging
+from django.urls import reverse
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+from azbankgateways.exceptions import AZBankGatewaysException
 
 def send_mail(email_r, code_r):
     EMAIL_HOST = 'smtp.gmail.com'
@@ -49,7 +53,31 @@ def send_sms(phonenumber,massage):
     sms = ghasedakpack.Ghasedak("41dbb4427c2ba8a6eeb0e62df5998d499b35e1f1c0ebb1ac124a42a81429cc75")
     temp = sms.send({'message':massage, 'receptor' : phonenumber, 'linenumber': '30005088' })
     print(temp)
+
+
+def go_to_gateway_view(request,money):
+    # خواندن مبلغ از هر جایی که مد نظر است
+    amount = money
+    # تنظیم شماره موبایل کاربر از هر جایی که مد نظر است
+    #user_mobile_number = '+989112221234'  # اختیاری
+
+    factory = bankfactories.BankFactory()
+    bank = factory.auto_create() # or factory.create(bank_models.BankType.BMI) or set identifier
+    bank.set_request(request)
+    bank.set_amount(amount)
+    # یو آر ال بازگشت به نرم افزار برای ادامه فرآیند
+    bank.set_client_callback_url('/callback-gateway')
+    #bank.set_mobile_number(user_mobile_number)  # اختیاری
+
+    # در صورت تمایل اتصال این رکورد به رکورد فاکتور یا هر چیزی که بعدا بتوانید ارتباط بین محصول یا خدمات را با این
+    # پرداخت برقرار کنید. 
+    bank_record = bank.ready()
+    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb")
     
+    # هدایت کاربر به درگاه بانک
+    return bank.redirect_gateway()
+
+  
 #برای رجیستر کردن ابتدا وارد این صفحه میشود و با زدن دکمه تایید برای او کد ارسال میشود و به تابع پایینی منتقل میشود
 @csrf_exempt
 @require_http_methods(["POST","GET"])
@@ -331,6 +359,7 @@ def Final_v(request):
             return redirect('/users/final/')
     #این برای زمانی است که کاربر گزینه پرداخت را میزند
     elif request.method == "POST":
+        print("222222222222222222222222222222")
         #در این قسمت زمانی که کاربر گزینه پرداخت را میزند به این قسمت می آید و به خاطر اینکه آدرس را
         #میگیریم از دوباره 
         #پس متد ما از نوع پست خواهد بود و در این قسمت باید آدرسمون از دوباره سیو شود
@@ -383,14 +412,37 @@ def Final_v(request):
                 #منتقل میشوددر اپ 
                 #order
                 #در این قسمت اطلاعات مربوط به ثبت سفارش به تابع مورد نظر ارسال مشود
+                print("before gatway")
+                #temp5 = go_to_gateway_view(request,TotalPrice)
+                #print(temp5)
+                # خواندن مبلغ از هر جایی که مد نظر است
+                amount = TotalPrice
+                # تنظیم شماره موبایل کاربر از هر جایی که مد نظر است
+                user_mobile_number = '+989115147898'  # اختیاری
+
+                factory = bankfactories.BankFactory()
+                bank = factory.auto_create() # or factory.create(bank_models.BankType.BMI) or set identifier
+                bank.set_request(request)
+                bank.set_amount(amount)
+                # یو آر ال بازگشت به نرم افزار برای ادامه فرآیند
+                bank.set_client_callback_url('/order/register/')
+                bank.set_mobile_number(user_mobile_number)  # اختیاری
+
+                # در صورت تمایل اتصال این رکورد به رکورد فاکتور یا هر چیزی که بعدا بتوانید ارتباط بین محصول یا خدمات را با این
+                # پرداخت برقرار کنید. 
+                bank_record = bank.ready()
+                print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+                
+                # هدایت کاربر به درگاه بانک
+                return bank.redirect_gateway()
+                print("after gatway")
                 #context = {'products':products,'price':TotalPrice,'user':user}
                 #request.session['products'] = products
                 #request.session['price'] = TotalPrice
                 #request.session['user'] = user
                 #print(request.session.get('price'))
                 #print(request.session.get('user'))
-                print("nima8")
-                return redirect('/order/register/')               
+                print("nima8")               
             else:
                 messages.error(request,"please login ,tryagain","failed")
                 return redirect('/')  
