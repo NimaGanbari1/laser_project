@@ -1,24 +1,21 @@
-from django.shortcuts import render,get_object_or_404,redirect
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+from django.urls import reverse
+from django.http import HttpResponse, Http404
+import logging
+from django.contrib import messages
+import random
+from .models import Order
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from users.models import Cart
 from products.models import Product
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from .models import Order
-import random
-from django.contrib import messages
-import logging
 
-from django.http import HttpResponse, Http404
-from django.urls import reverse
-
-from azbankgateways import bankfactories, models as bank_models, default_settings as settings
-
-
+#در هنگام بازگشت از بانک به این تابع منتقل میشود
 def callback_gateway_view(request):
     tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
-    print(tracking_code)
     if not tracking_code:
         print("این لینک معتبر نیست.")
         return 0
@@ -42,34 +39,29 @@ def callback_gateway_view(request):
 
 
 @csrf_exempt
-@require_http_methods(["GET","POST"])
+@require_http_methods(["GET", "POST"])
 def Ok_Record(request):
-    #ابتدا به بانک درخواست میدهیم که این کاربر آیا پرداخت موفقی داشته است یا خیر؟ در تابع بالایی
-    #در صورتی که اوکی بود یک آبجکت ساخته میشود و سیو میشود
-    #البت بهتر است که وقتی سفارشی ثبت شد یک پیام یا ایمیل برای ادمین فرستاده شود
-    #ولی اگر اوکی نبود به کاربر نمایش داده شود که پرداخت با  مشکل مواجه شده است و از دوباره تلاش کند
-    #در این قسمت ما اطلاعات مربوط به ساخت آبجکت را گرفتیم و با 
-    #'products':products,'price':TotalPrice,'user':user
-    #به آنها دسترسی داریم
-    print(request.method)
+    # ابتدا به بانک درخواست میدهیم که این کاربر آیا پرداخت موفقی داشته است یا خیر؟ در تابع بالایی
+    # در صورتی که اوکی بود یک آبجکت ساخته میشود و سیو میشود
+    # البت بهتر است که وقتی سفارشی ثبت شد یک پیام یا ایمیل برای ادمین فرستاده شود
+    # ولی اگر اوکی نبود به کاربر نمایش داده شود که پرداخت با  مشکل مواجه شده است و از دوباره تلاش کند
+    # در این قسمت ما اطلاعات مربوط به ساخت آبجکت را گرفتیم و با
+    # 'products':products,'price':TotalPrice,'user':user
+    # به آنها دسترسی داریم
     if request.method == "GET":
-        print("10")
-        #print(request.session.get('price'))
-        #print(request.POST['price'])
-        print("11")
         status = callback_gateway_view(request)
         context = None
         if status == 0:
-            #اگر لینک بازگرداننده معتبر نباشد
-            messages.error(request,"این لینک معتبر نیست.","failed")
+            # اگر لینک بازگرداننده معتبر نباشد
+            messages.error(request, "این لینک معتبر نیست.", "failed")
             context = {
-                "status":"این لینک معتبر نیست."
+                "status": "این لینک معتبر نیست."
             }
-        #void 
+        # void
         elif status == 10:
             pass
-            #یک آبجکت میسازیم و ذخیره میکنیم و به ادمین یک پیغام میدهیم
-            #تعداد و کد محصول ها در متغیر پایینی است
+            # یک آبجکت میسازیم و ذخیره میکنیم و به ادمین یک پیغام میدهیم
+            # تعداد و کد محصول ها در متغیر پایینی است
             products = Cart.objects.filter(user=request.user).values()
             ProductCodes = []
             ProductCounts = []
@@ -77,55 +69,56 @@ def Ok_Record(request):
                 ProductCodes.append(str(list(x.values())[1]))
                 ProductCounts.append(str(list(x.values())[2]))
             ###############################################
-            #قیمت نهایی محاسبه شود
+            # قیمت نهایی محاسبه شود
             user = str(request.user)
             TotalPrice = 0
             for x in products:
-                #TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))           
-                temp = Product.objects.get(uniqe_code=list(x.values())[1])               
-                price = temp.price             
-                price *= list(x.values())[2]       
-                #PricePerGood.append(price)
+                # TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))
+                temp = Product.objects.get(uniqe_code=list(x.values())[1])
+                price = temp.price
+                price *= list(x.values())[2]
+                # PricePerGood.append(price)
                 TotalPrice += price
-                #tempuser = User.objects.get()
+                # tempuser = User.objects.get()
             ##########################################################
-            #اینم برای یوزر
-            phonemail = str(request.user)
-            tempuser = ''
-            if phonemail.isdigit():
-                tempuser = User.objects.get(phone_number = int(phonemail))
-            else:
-                tempuser = User.objects.get(email = phonemail)
+            # اینم برای یوزر
+            #phonemail = str(request.user)
+            #tempuser = ''
+            #if phonemail.isdigit():
+            #    tempuser = User.objects.get(phone_number=int(phonemail))
+            #else:
+            #    tempuser = User.objects.get(email=phonemail)
+            
+            tempuser = User.objects.get(id = request.user.id)
             ##################################
-            
-            ortemp = Order.objects.create(ProductCodes=ProductCodes,ProductCounts=ProductCounts,Price=TotalPrice,user=tempuser,Address=tempuser.address,
-                                 consumed_code=random.randint(10000,99999),status_pay=10)
-            #حالا تمام سفارشات مربوز به 
-            #cart
-            #که مربوط به این کاربر میباشد باید حذف شود
-            print("99999999999999888888888888887777777777777")
+
+            ortemp = Order.objects.create(ProductCodes=ProductCodes, ProductCounts=ProductCounts, Price=TotalPrice, user=tempuser, Address=tempuser.address,
+                                          consumed_code=random.randint(10000, 99999), status_pay=10)
+            # حالا تمام سفارشات مربوز به
+            # cart
+            # که مربوط به این کاربر میباشد باید حذف شود
             products = Cart.objects.filter(user=request.user).delete()
-            
-            #به ادمین یک پیام جهت سفارش جدید زده میشود در این قسمت
-            #messages.success(request,"Your order has been successfully placed")
+
+            # به ادمین یک پیام جهت سفارش جدید زده میشود در این قسمت
+            # messages.success(request,"Your order has been successfully placed")
             context = {
-                "status":"Payment was successful"
+                "status": "Payment was successful"
             }
-        #pay
+        # pay
         elif status == 20:
-            #به هر دلیلی که پرداخت انجام نشد به این قسمت می آید 
-            messages.error(request,"پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.","failed")
+            # به هر دلیلی که پرداخت انجام نشد به این قسمت می آید
+            messages.error(
+                request, "پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.", "failed")
             context = {
-                "status":"Payment failed"
+                "status": "Payment failed"
             }
-        #error
+        # error
         elif status == 30:
             pass
-        #cancel
+        # cancel
         elif status == 31:
             pass
-        #refunded
-        return render(request,"order/final.html/",context=context) 
+        # refunded
+        return render(request, "order/final.html/", context=context)
     else:
         return redirect('/')
-    

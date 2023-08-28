@@ -19,12 +19,21 @@
                 <p>is_active: {{ post.is_active }}</p>
                 <p>is_enable: {{ post.is_enable }}</p>
                 <p>code: {{ post.uniqe_code }}</p>
-                <p>category title: {{ post.categor.title }}</p>
-                <p>Avatar: {{ post.avatar }}</p>
+                
+                
+                
+
+                category:
+                {%for f in post.categories.all%}
+                    {{f}}
+                {%endfor%}
+                <br>
+                {%for f in post.files.all%}
+                    <img src = "/media/{{f.fil}}" width="50" height="60">
+                {%endfor%}
                 <p>create_time: {{ post.create_time }}</p>
                 </tr>
-                <hr>
-
+                <hr>        
                 <form action="" method="post">
                     {% csrf_token %}
                     <p>Count: {{ form.count }}</p>

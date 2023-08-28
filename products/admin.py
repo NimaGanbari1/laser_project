@@ -5,7 +5,7 @@ from .models import Category , Product, Comment , Post_File
 class CommentInLineAdmin(admin.TabularInline):
     model = Comment
     #user add in fields
-    fields = ['id','text']
+    fields = ['id','text','user']
     extra = 0
 
 class PostInLineAdmin(admin.TabularInline):
@@ -31,9 +31,10 @@ class PostFileAdmin(admin.ModelAdmin):
     inlines = [CommentInLineAdmin,PostInLineAdmin]
     empty_value_display = 'Unknown Item field'
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['id','title','description','create_time','avatar','is_enable','parent']
    
 
 admin.site.register(Product,PostFileAdmin)
-admin.site.register(Category,CategoryAdmin)
+#admin.site.register(Category,CategoryAdmin)

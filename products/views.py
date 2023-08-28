@@ -39,11 +39,10 @@ def index(request,page):
 def ProductSearch(request):
     if request.method == "GET":
         title = request.GET.get('q')
-        print(title)
         context = {}
         posts = None
         try:
-            posts = Product.objects.filter(title=title)
+            posts = Product.objects.filter(title__icontains =title)
         except Product.DoesNotExist:
             return render(request,'products/ProductionList.html',context=context)
         p = Paginator(posts,per_page=3)
@@ -67,9 +66,6 @@ def ProductDetail(request,id):
         'count': 1
         }
         form = CreateCartForm(initial=intaial_data)
-        print(form['uniqeCode'])
-        print(form['count'])
-        print(form['user'])
         #در این قسمت کامنت های این محصول نمایش داده میشود
         try:
             ListOfComment = Comment.objects.filter(Product=post).values()
@@ -93,30 +89,17 @@ def ProductDetail(request,id):
     #زمانی که مخاطب دکمه سابمیت را زد در صفحه جزئیات محصولات به این قسمت هدایت میشود
     else:
         if request.user.is_authenticated:
-            print("nima1")
             form = CreateCartForm(request.POST)
-            print("nima1")
-            print(form['uniqeCode'])
-            print(form['count'])
-            print(form['user'])
             if form.is_valid():
-                print("nima1")
                 cd = form.cleaned_data
-                print("nima1")
                 phonemail = cd['user']
-                print("1111111111111111111111111111111")
-                print(type(phonemail))
                 if phonemail.isdigit():
                     user = User.objects.get(phone_number = int(phonemail))
                 else:
                     user = User.objects.get(email = phonemail)
-                print("nima1")
-                print(user)
-                print(type(user))
+                    
+                
                 new_cart = Cart.objects.create(Code=cd['uniqeCode'],Count=cd['count'],user=user)
-                print("nima1")
-                #new_cart.save()
-                print("nima1")
                 return redirect('/')
             else:
                 messages.error(request,'data is not validsss','failed')
@@ -129,55 +112,42 @@ def ProductDetail(request,id):
 def SetComment(request):
     if request.method == "POST":
         if request.user.is_authenticated:
-            phonemail = str(request.user)
-            print("1111111111111111111111111111111")
-            print(type(phonemail))
-            if phonemail.isdigit():
-                user = User.objects.get(phone_number = int(phonemail))
-            else:
-                user = User.objects.get(email = phonemail)  
+            #phonemail = str(request.user)
+            #if phonemail.isdigit():
+            #    user = User.objects.get(phone_number = int(phonemail))
+            #else:
+            #    user = User.objects.get(email = phonemail)  
+                
+            user = User.objects.get(id = request.user.id)
             form = CreateCommentForm(request.POST)
-            print("1111111111111111111111111111111")
             if form.is_valid():
-                print("1111111111111111111111111111111")
                 cd = form.cleaned_data
                 product = cd['Product']
                 if not user.first_name:
                     messages.error(request,"To post a comment, you must first register your name in your profile. ,tryagain","failed")
                     return redirect(f'/products/indexdetail/{product.uniqe_code}/')
-                print("1111111111111111111111111111111")
                 Comment.objects.create(user=request.user,Product=product,text=cd['text'])
                 messages.success(request,"Your comment has been registered successfully")
                 return redirect(f'/products/indexdetail/{product.uniqe_code}/')
             else:
                 messages.error(request,"is not valid ,tryagain","failed")
-                print("111")
                 return redirect('/')
         else:
                 messages.error(request,"First, log in to your account","failed")
-                print("222")
                 return redirect('/users/register')
 
 def TypeCategory(request,type):
-    print("1111111111111111111111111")
     Products = None
     if type == None or type == "None":
         Products = Product.objects.all()
     else:
-        print("22222222222222222")
         temp = Category.objects.get(title=type)
-        print("3333333333333333333")
-        print(temp.is_enable)
         Products = Product.objects.filter(categories = temp.id)
-    print("1111111111111111111111111")
     return Products            
 
 def HomePage(request):
     type = request.GET.get('category')
-    print(type)
     Production = TypeCategory(request,type)
-    print("44444444444444444")
-    print(Production)
     categories = Category.objects.all()
     #p = ProductionList(request)
     context = {'categories':categories,'posts':Production}

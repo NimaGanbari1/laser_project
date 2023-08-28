@@ -26,7 +26,7 @@ class EditCartForm(forms.Form):
     code = forms.IntegerField()
     
 class FinalAddresForm(forms.Form):
-    Address = forms.CharField()
+    Address = forms.CharField(widget=forms.Textarea)
     
     
     
