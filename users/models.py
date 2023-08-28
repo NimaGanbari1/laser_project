@@ -24,8 +24,6 @@ class UserManager(BaseUserManager):
         # managers are by definition working on the real model.
         # GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
         # username = GlobalUserModel.normalize_username(username)
-        #print(type(email))
-        #print(email)
         user = self.model(phone_number=phone_number,
                           is_staff=is_staff,
                           is_superuser=is_superuser,
@@ -98,7 +96,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True
         )
     # nick_name = models.CharField(verbose_name=_('nick name'),max_length=150,blank=True)
-    avatar = models.ImageField(_('avatar'), blank=True, null=True)
+    #avatar = models.ImageField(_('avatar'), blank=True, null=True)
     # birthday = models.DateField(_('birthday'),null=True,blank=True)
     # gender = models.BooleanField(_('gender'),null=True,help_text=_('female is False,male is True,null is unset'))
     # province = models.ForeignKey(verbose_name=_('province'),to='Province',null=True, on_delete= models.SET_NULL)
@@ -238,7 +236,7 @@ class Cart(models.Model):
     #    max_length=90,  # 6 * 10 character nominals, plus commas
     #)
     Code = models.IntegerField()
-    Count = models.SmallIntegerField()
+    Count = models.PositiveIntegerField()
     user = models.ForeignKey(to=User,related_name='carts', on_delete=models.CASCADE)
     
     #def __str__(self):

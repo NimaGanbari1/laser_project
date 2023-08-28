@@ -25,6 +25,7 @@ import logging
 from django.urls import reverse
 from azbankgateways import bankfactories, models as bank_models, default_settings as settings
 from azbankgateways.exceptions import AZBankGatewaysException
+from order.models import Order
 
 def send_mail(email_r, code_r):
     EMAIL_HOST = 'smtp.gmail.com'
@@ -49,10 +50,8 @@ def send_sms(phonenumber,massage):
     #        'message': massage,
     #    } 
     #temp = requests.post(url,data=params)
-    #print(temp)
     sms = ghasedakpack.Ghasedak("41dbb4427c2ba8a6eeb0e62df5998d499b35e1f1c0ebb1ac124a42a81429cc75")
     temp = sms.send({'message':massage, 'receptor' : phonenumber, 'linenumber': '30005088' })
-    print(temp)
 
 
 def go_to_gateway_view(request,money):
@@ -72,7 +71,6 @@ def go_to_gateway_view(request,money):
     # در صورت تمایل اتصال این رکورد به رکورد فاکتور یا هر چیزی که بعدا بتوانید ارتباط بین محصول یا خدمات را با این
     # پرداخت برقرار کنید. 
     bank_record = bank.ready()
-    print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb")
     
     # هدایت کاربر به درگاه بانک
     return bank.redirect_gateway()
@@ -87,17 +85,16 @@ def register_v(request):
         if form.is_valid():
         #phonemail = request.POST.get("phonemail")
             phonemail = form.cleaned_data['phonemail'] 
+            print(phonemail)
+            print(type(phonemail))
             code_random = random.randint(10000,99999)
             print(code_random)
-            print(phonemail)
             try:
                 #در این قسمت هم باید بر اساس شماره تلفن و هم بر اساس ایمیل چک شود
-                print(code_random)
                 if phonemail.isdigit():
                     user = User.objects.get(phone_number=phonemail)
                 else:
                     user = User.objects.get(email=phonemail)
-                print(code_random)
                 return HttpResponse({'this phone number is alredy registered': 'The code send to your phone. Please enter it.'})
             except User.DoesNotExist:
                 if phonemail.isdigit():
@@ -121,41 +118,25 @@ def register_v(request):
 @csrf_exempt
 @require_http_methods(["POST","GET"])
 def create_user_v(request):
-    print("1234")
     if request.method == 'POST':
-        print("12345")
         form = createUserForm(request.POST)
-        print("123123123")
         if form.is_valid():
-            print("123123123")
             phonemail = form.cleaned_data['phonemail']
             code_rand = form.cleaned_data['code']
             password = form.cleaned_data['password']
-            print(phonemail)
-            print(code_rand)
-            print(password)
             if phonemail.isdigit():
                 code_cache = cache.get(str(phonemail))
-                print(code_cache)
-                print(code_rand)
                 if not compare_digest(code_cache, code_rand):
                     return HttpResponse({'Compare is Not Valid':'The entered code is invalid'})
-                print("123123123")
                 User.objects.create_user(phone_number=phonemail,password=password,username=phonemail)
-                print("123123123")
                 messages.success(request,'user registered successfully','success')
                 response = redirect('/users/login/')
                 return response            
                 #return HttpResponse({'title9':'The entered code is invalid'})
             else:
                 code_cache = cache.get(str(phonemail))
-                print(code_cache)
-                print(code_rand)
-                print(type(code_cache))
-                print(type(code_rand))
                 if not compare_digest(code_cache,code_rand):
                     return HttpResponse({'title2':'The entered code is invalid'})
-                print("120230")
                 User.objects.create_user(email=phonemail,password=password,username=phonemail)
                 messages.success(request,'user registered successfully','success')
                 response = redirect('/users/login/')
@@ -172,7 +153,6 @@ def create_user_v(request):
 def login_v(request):   
     if request.method == 'POST':
         form = UserLoginForm(request.POST)
-        print("123123123")
         if form.is_valid():
             cd = form.cleaned_data
             user = authenticate(request,username=cd['phonemail'],password=cd['password'])
@@ -181,7 +161,6 @@ def login_v(request):
                 messages.success(request,'logged successfully','success')
                 return redirect('/')
             else:
-                print("120")
                 messages.error(request,'logged failed','failed')
                 return redirect('/users/login/')    
                 
@@ -200,34 +179,22 @@ def logout_v(request):
 @csrf_exempt
 @require_http_methods(["GET","POST"]) 
 def Cart_v(request):
-    print("1")
     #بخش گت مشکل ندارد ولی بخش صفحه اچ تی ام ال با بخض پست مشکل دارد
     #برای زمانی هست که کاربر روی سبد خرید خود را میزند و می خواهد سبد خرید خود را ببیند 
     if request.method == 'GET':
-        print("1")
         if request.user.is_authenticated:
             #pass
             #list_of_product = Cart.objects.filter(user=request.user)
-            
-            print("1")
             list_of_product = Cart.objects.filter(user=request.user).values()
             temp1 = ''
             if not list_of_product:
                 temp1 = 'the list is empty'  
             #list_of_product = User.carts
             #for x in list_of_product:
-            #    print(x.Code)
-            #    print(x.Count)
-            print(list_of_product)
             #ListCount = []
             products2 = []
             ListForm = []
             for x in list_of_product:
-                
-                #temp1 = x.values()
-                #print(temp1)
-                #print(type(temp1))
-                print(list(x.values())[1])
                 temp = Product.objects.get(uniqe_code=list(x.values())[1])
                 products2.append(temp)
                 #ListCount.append(list(x.values())[2])
@@ -235,14 +202,8 @@ def Cart_v(request):
                 'count'    : list(x.values())[2],
                 'code'     : list(x.values())[1]
                 }
-                print(list(x.values())[2])
                 form = EditCartForm(initial=intaial_data)
-                print("7777777777777777777777777777")
-                print(form['code'])
-                print(form['count'])
                 ListForm.append(form)
-                print(ListForm[0]['code'])
-            print("1")
             #لیست محصولات بر اساس ابجکت+لیست فرم ها +اگر لیست خالی باشد            
             context = {'products2':products2,'ListForm':ListForm,'temp':temp1}
             return render(request,"users/cart.html",context=context)
@@ -253,37 +214,14 @@ def Cart_v(request):
     #این قسمت از تابع هم باید زمانی درست شود که اطلاعات از فرم صحیح دریافت شده باشدکه الان اطلاعات درست دریافت نمشود
     elif request.method == 'POST':
         #در این قسمت تعدادی فرم به سمت سرور فرستاده میشود که باید اطلاعات همه آنها را ذخیره کرد
-        print("1")
         forms = EditCartForm(request.POST)
         #form1 = request.POST.get()
-        print("1")
-        for x in forms:
-            print(x)
+
         if forms.is_valid():
-            print(forms)
-            print("1")
             cd = forms.cleaned_data
-            print(cd)
-            print(len(cd))
-            for x in cd:
-                print(x)
             list_of_product = Cart.objects.filter(user=request.user).values()
-            
-            print(list_of_product)
             for x in list_of_product:
-                print(cd['code'])
-                print(cd['count'])
                 for temp in cd:
-                    print("7777777777777777777777777777")
-                    #print(temp[code])
-                    print(temp)
-                    #print(type(temp['code']))
-                    #print(list(x.values())[1])
-                    #print(type(list(x.values())[1]))
-                    print(list(x.values())[1])
-                    print(type(list(x.values())[1]))
-                    #print(temp['code']['count'])
-                    #print(type(temp['code']))
                     if int(list(x.values())[1]) == int(temp['code']):
                         list(x.values())[2] = temp['count']
                         list(x.values())[2].save() 
@@ -309,39 +247,24 @@ def Final_v(request):
             TotalPrice = 0
             TotalProduct = []
             PricePerGood = []
-            print("nima1")
-            print(products)
             #در این حلقه قیمت نهایی و
             for x in products:
-                print(x)
-                print("nima2")
                 TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))
-                print("nima3")
                 temp = Product.objects.get(uniqe_code=list(x.values())[1])
-                print("nima4")
                 price = temp.price
-                print("nima5")
                 price *= list(x.values())[2]
-                print("nima6")
-                print(price)
                 PricePerGood.append(price)
-                print("nima7")
                 TotalPrice += price
-                print("nima8")
-                print(TotalPrice)
             #tempuser = User.objects.get()
-            print("nimaaa")
             #این قسمت برای گرفتن آدرس کاربر میباشد
-            phonemail = str(request.user)
-            print("nimaaa")
-            print(phonemail)
-            tempuser = ""
-            if phonemail.isdigit():
-                print("nimaaa")
-                tempuser = User.objects.get(phone_number = int(phonemail))
-            else:
-                print("nimaaa22")
-                tempuser = User.objects.get(email = phonemail)
+            #phonemail = str(request.user)
+            #tempuser = ""
+            #if phonemail.isdigit():
+            #    tempuser = User.objects.get(phone_number = int(phonemail))
+            #else:
+            #    tempuser = User.objects.get(email = phonemail)
+                
+            tempuser = User.objects.get(id = request.user.id)
             TotalAddress = tempuser.address
             
             intaial_data ={
@@ -359,7 +282,6 @@ def Final_v(request):
             return redirect('/users/final/')
     #این برای زمانی است که کاربر گزینه پرداخت را میزند
     elif request.method == "POST":
-        print("222222222222222222222222222222")
         #در این قسمت زمانی که کاربر گزینه پرداخت را میزند به این قسمت می آید و به خاطر اینکه آدرس را
         #میگیریم از دوباره 
         #پس متد ما از نوع پست خواهد بود و در این قسمت باید آدرسمون از دوباره سیو شود
@@ -368,42 +290,27 @@ def Final_v(request):
             #آدرس کاربر ذخیره شود 
             form = FinalAddresForm(request.POST)
             if form.is_valid():
-                print("1")
                 cd = form.cleaned_data
-                print(cd)
-                phonemail = str(request.user)
-                print("1111111111111111111111111111111")
-                print(type(phonemail))
-                if phonemail.isdigit():
-                    user = User.objects.get(phone_number = int(phonemail))
-                else:
-                    user = User.objects.get(email = phonemail)
+                #phonemail = str(request.user)
+                #if phonemail.isdigit():
+                #    user = User.objects.get(phone_number = int(phonemail))
+                #else:
+                #    user = User.objects.get(email = phonemail)
+                user = User.objects.get(id = request.user.id)
                 user.address = cd['Address']
                 user.save()
                 ###############################################
                 #قیمت نهایی محاسبه شود
                 products = Cart.objects.filter(user=request.user).values()
-                print(products)
-                print("nima7898")
                 user = str(request.user)
                 TotalPrice = 0
                 for x in products:
-                    print(x)
-                    print("nima2")
                     #TotalProduct.append(Product.objects.get(uniqe_code=list(x.values())[1]))
-                    print("nima3")
                     temp = Product.objects.get(uniqe_code=list(x.values())[1])
-                    print("nima4")
                     price = temp.price
-                    print("nima5")
                     price *= list(x.values())[2]
-                    print("nima6")
-                    print(price)
                     #PricePerGood.append(price)
-                    print("nima7")
                     TotalPrice += price
-                    print("nima8")
-                    print(TotalPrice)
                     #tempuser = User.objects.get()
                 ##########################################################
                 #به درگاه بانکی منتقل میشود و کار های حسابرسی انجام مشود 
@@ -412,9 +319,7 @@ def Final_v(request):
                 #منتقل میشوددر اپ 
                 #order
                 #در این قسمت اطلاعات مربوط به ثبت سفارش به تابع مورد نظر ارسال مشود
-                print("before gatway")
                 #temp5 = go_to_gateway_view(request,TotalPrice)
-                #print(temp5)
                 # خواندن مبلغ از هر جایی که مد نظر است
                 amount = TotalPrice
                 # تنظیم شماره موبایل کاربر از هر جایی که مد نظر است
@@ -431,18 +336,13 @@ def Final_v(request):
                 # در صورت تمایل اتصال این رکورد به رکورد فاکتور یا هر چیزی که بعدا بتوانید ارتباط بین محصول یا خدمات را با این
                 # پرداخت برقرار کنید. 
                 bank_record = bank.ready()
-                print("bbbbbbbbbbbbbbbbbbbbbbbbbbbb")
                 
                 # هدایت کاربر به درگاه بانک
                 return bank.redirect_gateway()
-                print("after gatway")
                 #context = {'products':products,'price':TotalPrice,'user':user}
                 #request.session['products'] = products
                 #request.session['price'] = TotalPrice
-                #request.session['user'] = user
-                #print(request.session.get('price'))
-                #print(request.session.get('user'))
-                print("nima8")               
+                #request.session['user'] = user             
             else:
                 messages.error(request,"please login ,tryagain","failed")
                 return redirect('/')  
@@ -473,27 +373,37 @@ def Profile_v(request):
         if request.user.is_authenticated:
             ########################################################
             #کاربر رو دریافت میکنیم
-            phonemail = str(request.user)
-            print("nimaaa111")
-            print(phonemail)
-            tempuser = ""
-            if phonemail.isdigit():
-                print("nimaaa222")
-                tempuser = User.objects.get(phone_number = int(phonemail))
-            else:
-                print("nimaaa333")
-                tempuser = User.objects.get(email = phonemail)
+            #phonemail = str(request.user)
+            #tempuser = ""
+            #if phonemail.isdigit():
+            #    tempuser = User.objects.get(phone_number = int(phonemail))
+            #else:
+            #    tempuser = User.objects.get(email = phonemail)
             #########################################################
-            #tempuser = User.objects.get(id = request.user.id)
+            tempuser = User.objects.get(id = request.user.id)
             #اطلاعات کاربر رو به صورت پیش فرض ست میکنیم
             intaial_data ={
                 'first_name'    : tempuser.first_name,
                 'last_name'     : tempuser.last_name,
-                'avatar'        : tempuser.avatar,
+                #'avatar'        : tempuser.avatar,
                 'address'       : tempuser.address
             }
             form = ProfileForm(initial=intaial_data)
-            context = {'form':form}
+            #-------------------------------------------------------#
+            orders = Order.objects.filter(user=tempuser)
+            codetemp = []
+            counttemp = []
+            for x in orders:
+                codetemp.append(x.ProductCodes)
+                counttemp.append(x.ProductCounts)
+            listpro = []
+            for y in codetemp:
+                temp = []
+                for x in y:
+                    temp1 = Product.objects.get(uniqe_code=x)
+                    temp.append(temp1.title)
+                listpro.append(temp)
+            context = {'form':form,'order':orders,'listpro':listpro,'counttemp':counttemp}
             return render(request,'users/profile.html',context=context)
             
         else:
@@ -505,23 +415,13 @@ def Profile_v(request):
             ######################################################
             #آدرس کاربر ذخیره شود 
             form = ProfileForm(request.POST, request.FILES)
-            print(form['first_name'])
-            print(form['last_name'])
-            print(form['avatar'])
-            print(form['address'])
-            print("1212212121212")
-            #print(form)
             user = User.objects.get(id=request.user.id)
             if form.is_valid():
-                print("1")
                 cd = form.cleaned_data
-                print("1212212121212111111111111111111111111111111")
                 tempuser = User.objects.get(id = request.user.id)
-                print(cd['first_name'])
                 tempuser.first_name = cd['first_name']
                 tempuser.last_name = cd['last_name']
                 tempuser.avatar = cd['avatar']
-                print(cd['avatar'])
                 tempuser.address = cd['address']
                 tempuser.save()
                 #form.save()
@@ -559,7 +459,6 @@ def ForgotPassword_v(request):
         if form.is_valid():
             cd = form.cleaned_data
             phonemail = cd['phonemail']
-            print(phonemail)
             try:
                 if phonemail.isdigit():
                     user = User.objects.get(phone_number=phonemail)
@@ -568,7 +467,6 @@ def ForgotPassword_v(request):
             except User.DoesNotExist:
                 return HttpResponse({'this phone number is not alredy registered': 'The code send to your phone. Please enter it.'})
             code_random = random.randint(10000,99999)
-            print(code_random)
             if phonemail.isdigit():
                 cache.set(str(phonemail),str(code_random),3*60)
                 #send sms
@@ -592,12 +490,9 @@ def SetCode_v(request):
             cd = form.cleaned_data
             phonemail = cd['phonemail']
             code_rand = cd['code']
-            print(code_rand)
             code_cache = cache.get(str(phonemail))
-            print(code_cache)
             if not compare_digest(code_cache,code_rand):
                 return HttpResponse({'title2':'The entered code is invalid'})
-            print(phonemail)
             return redirect("/users/setpass/")
 
 def SetPassword_v(request):

@@ -67,13 +67,23 @@
             <p>همچین پستی وجود ندارد</p> 
         {%endif%}
         {% for x in posts %}
+        
+        {%for f in x.files.all%}
+            <img src = "media/{{f.fil}}" width="50" height="60">
+        {%endfor%}
+        <br>
         <!--اگر علامت اسلش را قبل از پروداکت نگذاریم باعث میشود که این آدرس جدید به آدرس قبلی کانکت شود و به مشکل میخوریم-->
         <p><a href="/products/indexdetail/{{ x.uniqe_code }}/">title:{{x.title}}</a></p>
         <p>code: {{ x.uniqe_code }}</p>
-        <p>caption: {{ x.caption }}</p>
         <p>price: {{x.price}}</p>
-        <p>categories: {{x.categories}}</p>
-        <p>files: {{x.files}}</p>
+        category:
+        {%for f in x.categories.all%}
+            {{f}}
+        {%endfor%}
+        
+
+            
+
         <hr>
         {%endfor%}
         

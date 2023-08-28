@@ -26,6 +26,26 @@
             {{form.as_p}}
             <input type="submit" value="بررسی تغییرات">
         </form>
+        <!--در این قسمت تاریخچه سفارشات کاربر نمایش داده میشود و لیستی از لیست اسم محصولات و لیتس از لیست تعداد محصولات و 
+            یکسری اطلاعات دیگر را به این صفحه فرستادیم
+        -->
+        <h1> تاریخچه سفارشات</h1>
+        {% for y in listpro %}
+            <p> {{y}} </p> 
+        {%endfor%}
+        {% for y in counttemp %}
+            <p> {{y}} </p> 
+        {%endfor%}
+        <hr>
+        <hr>
+        {% for x in order %}
+            <p>Price: {{x.Price}} </p>
+            <p>Address: {{x.Address}} </p>
+            <p>status pay: {{x.status_pay}} </p>
+            <p>status build: {{x.status_build}} </p>
+            <p>create time: {{x.create_time}} </p>
+            <hr>
+        {%endfor%}
         <a href="/"><button type="button">بازگشت</button></a>
         <a href="/users/delete/"><button type="button">حذف حساب کاربری</button></a>
         <button type="button"><p><a href="/users/logout/">خروج از حساب کاربری</a></p></button>
