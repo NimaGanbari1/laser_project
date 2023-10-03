@@ -44,11 +44,13 @@
         {%endif%}
 
         <form action="/products/listsearch/" method="get">
-                <input type="text" id="search" name="q">
-                <button type="submit">جستجو</button>     
+            {% csrf_token %}
+            <input type="text" id="search" name="q">
+            <button type="submit">جستجو</button>     
         </form>
 
         <form action="/" method="get">
+            {% csrf_token %}
             <label for="category">دسته بندی:</label>
             <select id="category" name="category">
                 <option value="None">همه</option>
@@ -67,7 +69,7 @@
             <p>همچین پستی وجود ندارد</p> 
         {%endif%}
         {% for x in posts %}
-        
+            
         {%for f in x.files.all%}
             <img src = "media/{{f.fil}}" width="50" height="60">
         {%endfor%}

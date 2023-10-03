@@ -13,6 +13,9 @@
     </thead>-->
         <tbody>
                 <tr>
+                {%for f in post.files.all%}
+                    <img src = "/media/{{f.fil}}" width="50" height="60">
+                {%endfor%}
                 <p>title: {{ post.title }}</p>
                 <p>price: {{ post.price }}</p>
                 <p>caption: {{ post.caption }}</p>
@@ -28,9 +31,7 @@
                     {{f}}
                 {%endfor%}
                 <br>
-                {%for f in post.files.all%}
-                    <img src = "/media/{{f.fil}}" width="50" height="60">
-                {%endfor%}
+                
                 <p>create_time: {{ post.create_time }}</p>
                 </tr>
                 <hr>        
@@ -59,6 +60,12 @@
                     <p>{{ comform }}</p>
                     <input type="submit" value="ارسال دیدگاه">
                 </form>
+                {% comment %} <form action="/products/comment/" method="post">
+                    {% csrf_token %}
+                    <label for="{{ comform.text.id_for_label }}">نظر:</label>
+                    {{ comform.text }}
+                    <button type="submit">ذخیره</button>
+                </form> {% endcomment %}
         </tbody>
         <!--باید در این قسمت جایی برای انتخاب تعداد و دکمه ای برای اضافه کردن تعداد و کد این محصول به سبد خرید اضافه کنیم -->
         <!--uniqe_code-->

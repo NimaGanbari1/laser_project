@@ -7,7 +7,7 @@ User = get_user_model()
 class Category(models.Model):
     title = models.CharField(verbose_name=_("title"),max_length=50)
     description = models.TextField(verbose_name=_("description"),blank=True)
-    avatar = models.ImageField(verbose_name=_("avatar"),blank=True,upload_to='categories')
+    avatar = models.ImageField(verbose_name=_("avatar"),blank=True,null=True,upload_to='categories/%Y/%m/%d/')
     is_enable = models.BooleanField(verbose_name=_("is enable"),default=True)
     parent = models.ForeignKey('self',verbose_name=_("parent"),blank=True,null=True, on_delete= models.CASCADE)
     create_time = models.DateTimeField(verbose_name=_("create time"),auto_now_add=True)
@@ -23,7 +23,6 @@ class Category(models.Model):
 
 class Product(models.Model):
     title = models.CharField(verbose_name=_('title'), max_length=100)
-    #user = models.ForeignKey(User, on_delete= models.CASCADE)
     price = models.BigIntegerField(verbose_name=_('price'))
     caption = models.TextField(verbose_name=_('caption'),blank=True,max_length=1024,null=True)
     is_active = models.BooleanField(default=True,null=True)

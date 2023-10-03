@@ -59,6 +59,5 @@ class CartAdmin(admin.ModelAdmin):
     
     
 admin.site.unregister(Group)
-admin.site.register(User,MyUserAdmin)  
-#admin.site.register(UserProfile)  
+admin.site.register(User,MyUserAdmin)   
 admin.site.register(Cart,CartAdmin)
