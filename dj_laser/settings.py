@@ -20,6 +20,7 @@ LOCAL_APPS = [
     'order', 
     'Authentication',
     'Cart',
+    'AboutMe',
     
 ]
 
