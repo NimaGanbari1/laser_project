@@ -12,6 +12,7 @@ urlpatterns = [
     path('',include('products.urls')),
     path('captcha',include("captcha.urls")),
     path('accounts/',include("allauth.urls")),
+    path('auth/',include('Authentication.urls'))
     
 ]
 

@@ -2,20 +2,7 @@ from django import forms
 from products.models import Product
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from captcha.fields import CaptchaField
 
-class RegisterFrom(forms.Form):
-    phonemail = forms.CharField()
-
-class createUserForm(forms.Form):
-    phonemail = forms.CharField()
-    code = forms.CharField()
-    password = forms.CharField()
-    captcha = CaptchaField()
-    
-class UserLoginForm(forms.Form):
-    phonemail = forms.CharField()
-    password = forms.CharField() 
 
 class SetCodeForm(forms.Form):
     phonemail = forms.CharField()

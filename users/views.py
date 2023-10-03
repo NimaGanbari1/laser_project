@@ -11,7 +11,7 @@ from email.message import EmailMessage
 import smtplib
 from secrets import compare_digest
 #import mailtrap as mt
-from .forms import RegisterFrom,createUserForm,UserLoginForm,EditCartForm,FinalAddresForm,ProfileForm,SetPassFrom,SetCodeForm
+from .forms import EditCartForm,FinalAddresForm,ProfileForm,SetPassFrom,SetCodeForm
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from .models import Cart
@@ -26,32 +26,6 @@ from django.urls import reverse
 from azbankgateways import bankfactories, models as bank_models, default_settings as settings
 from azbankgateways.exceptions import AZBankGatewaysException
 from order.models import Order
-
-def send_mail(email_r, code_r):
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_HOST_USER = 'nimadfm1400@gmail.com'
-    EMAIL_PORT_SSL = 465
-    EMAIL_HOST_PASSWORD = 'eillarjyqtqczbsl'
-
-    msg = EmailMessage()
-    msg['Subject'] = 'verify'
-    msg['From'] = EMAIL_HOST_USER
-    msg['To'] = email_r
-    msg.set_content(str(code_r))
-    with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT_SSL) as server:
-        server.login(EMAIL_HOST_USER, EMAIL_HOST_PASSWORD)
-        server.send_message(msg)
-
-
-def send_sms(phonenumber,massage):    
-    #url = "https://api.kavenegar.com/v1/69716B377071796B6D7A3152334D57672F73305634686277682B42544570436C7A527064576F692B5639733D/sms/send.json"
-    #params = {
-    #        'receptor': phonenumber,#multiple mobile number, split by comma
-    #        'message': massage,
-    #    } 
-    #temp = requests.post(url,data=params)
-    sms = ghasedakpack.Ghasedak("41dbb4427c2ba8a6eeb0e62df5998d499b35e1f1c0ebb1ac124a42a81429cc75")
-    temp = sms.send({'message':massage, 'receptor' : phonenumber, 'linenumber': '30005088' })
 
 
 def go_to_gateway_view(request,money):
@@ -74,107 +48,6 @@ def go_to_gateway_view(request,money):
     
     # هدایت کاربر به درگاه بانک
     return bank.redirect_gateway()
-
-  
-#برای رجیستر کردن ابتدا وارد این صفحه میشود و با زدن دکمه تایید برای او کد ارسال میشود و به تابع پایینی منتقل میشود
-@csrf_exempt
-@require_http_methods(["POST","GET"])
-def register_v(request):
-    if request.method == 'POST':
-        form = RegisterFrom(request.POST)
-        if form.is_valid():
-        #phonemail = request.POST.get("phonemail")
-            phonemail = form.cleaned_data['phonemail'] 
-            print(phonemail)
-            print(type(phonemail))
-            code_random = random.randint(10000,99999)
-            print(code_random)
-            try:
-                #در این قسمت هم باید بر اساس شماره تلفن و هم بر اساس ایمیل چک شود
-                if phonemail.isdigit():
-                    user = User.objects.get(phone_number=phonemail)
-                else:
-                    user = User.objects.get(email=phonemail)
-                return HttpResponse({'this phone number is alredy registered': 'The code send to your phone. Please enter it.'})
-            except User.DoesNotExist:
-                if phonemail.isdigit():
-                    cache.set(str(phonemail),str(code_random),3*60)
-                    send_sms(phonenumber=phonemail,massage=code_random)
-                    response = redirect('/users/create/')
-                    return response
-                    #return HttpResponse({'title2': 'sms sabt'})
-                else:
-                    cache.set(str(phonemail),str(code_random),3*60)
-                    send_mail(phonemail,code_random)
-                    response = redirect('/users/create/')
-                    return response
-                    #return HttpResponse({'title3': 'email sabt'})
-    else:
-        form = RegisterFrom()
-        
-    return render(request,"users/register.html",{"form": form})
-    #return HttpResponse({'title': 'The code send to your phone. Please enter it.'})
-
-@csrf_exempt
-@require_http_methods(["POST","GET"])
-def create_user_v(request):
-    if request.method == 'POST':
-        form = createUserForm(request.POST)
-        if form.is_valid():
-            phonemail = form.cleaned_data['phonemail']
-            code_rand = form.cleaned_data['code']
-            password = form.cleaned_data['password']
-            if phonemail.isdigit():
-                code_cache = cache.get(str(phonemail))
-                if not compare_digest(code_cache, code_rand):
-                    return HttpResponse({'Compare is Not Valid':'The entered code is invalid'})
-                User.objects.create_user(phone_number=phonemail,password=password,username=phonemail)
-                messages.success(request,'user registered successfully','success')
-                response = redirect('/users/login/')
-                return response            
-                #return HttpResponse({'title9':'The entered code is invalid'})
-            else:
-                code_cache = cache.get(str(phonemail))
-                if not compare_digest(code_cache,code_rand):
-                    return HttpResponse({'title2':'The entered code is invalid'})
-                User.objects.create_user(email=phonemail,password=password,username=phonemail)
-                messages.success(request,'user registered successfully','success')
-                response = redirect('/users/login/')
-                return response
-                #return HttpResponse({'title8':'The entered code is invalid'})
-    else:
-        form = createUserForm()
-    return render(request,"users/create_user.html",{"form": form})    
-    #return HttpResponse({'title3':'Your information has been successfully registered'})     
-            
-#برای زمانی هست که کاربر میخواهد در سیستم لاگین کند           
-@csrf_exempt
-@require_http_methods(["POST","GET"])      
-def login_v(request):   
-    if request.method == 'POST':
-        form = UserLoginForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            user = authenticate(request,username=cd['phonemail'],password=cd['password'])
-            if user is not None:
-                login(request,user)
-                messages.success(request,'logged successfully','success')
-                return redirect('/')
-            else:
-                messages.error(request,'logged failed','failed')
-                return redirect('/users/login/')    
-                
-    else:
-        form = UserLoginForm()
-            
-    return render(request,"users/login.html",{"form": form})
-  
-#برای زمانی هست که کاربر میخواد در سیستم لاگ اوت کند         
-def logout_v(request):
-    logout(request)
-    messages.success(request,'logged out successfully')
-    return redirect('/')
-             
 
 @csrf_exempt
 @require_http_methods(["GET","POST"]) 

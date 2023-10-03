@@ -32,15 +32,15 @@
         <p><a href="admin/">ادمین</a></p>
         <p><a href="users/about/">درباره ما</a></p>
         {%if not request.user.is_authenticated %}
-            <a href="users/register">ثبت نام</a>
-            <p><a href="users/login/">ورود</a></p>
+            <a href="auth/register">ثبت نام</a>
+            <p><a href="auth/login/">ورود</a></p>
             {% load socialaccount %}
             <p><a href="{% provider_login_url 'google' %}?next=/">login with google</a></p>
         {%endif%}
         {%if request.user.is_authenticated %}
             <p><a href="users/cart/">سبد خرید</a></p>
             <p><a href="users/profile/">پروفایل</a></p>
-            <p><a href="/users/logout/">خروج از حساب کاربری</a></p>
+            <p><a href="/auth/logout/">خروج از حساب کاربری</a></p>
         {%endif%}
 
         <form action="/products/listsearch/" method="get">

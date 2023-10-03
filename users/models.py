@@ -14,16 +14,7 @@ class UserManager(BaseUserManager):
         Create and save a user with the given username, email, and password.
         """
         now = timezone.now()
-        #if phone_number != None:
-        #    email = phone_number
-        #else:
-        #    phone_number = email
         email = self.normalize_email(email)
-        # Lookup the real model class from the global app registry so this
-        # manager method can be used in migrations. This is fine because
-        # managers are by definition working on the real model.
-        # GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
-        # username = GlobalUserModel.normalize_username(username)
         user = self.model(phone_number=phone_number,
                           is_staff=is_staff,
                           is_superuser=is_superuser,
@@ -74,8 +65,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         help_text=_(
             'Required. 32 characters or fewer. Letters, digits and . _ only.'),
-        #validators=[validators.RegexValidator(
-        #    r'^[a-zA-Z0-9][a-zA-Z0-9_\.]+$', _('Enter a valid username starting with a-z.'))],
         error_messages={
             'unique': _("A user with that username already exists."),
             'validators': _('invalid'),
@@ -95,11 +84,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True, 
         blank=True
         )
-    # nick_name = models.CharField(verbose_name=_('nick name'),max_length=150,blank=True)
-    #avatar = models.ImageField(_('avatar'), blank=True, null=True)
-    # birthday = models.DateField(_('birthday'),null=True,blank=True)
-    # gender = models.BooleanField(_('gender'),null=True,help_text=_('female is False,male is True,null is unset'))
-    # province = models.ForeignKey(verbose_name=_('province'),to='Province',null=True, on_delete= models.SET_NULL)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -141,9 +125,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Return the short name for the user."""
         return self.first_name
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
-        """Send an email to this user."""
-        send_mail(subject, message, from_email, [self.email], **kwargs)
 
     @property
     def is_loggein_user(self):
