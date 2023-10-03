@@ -1,5 +1,4 @@
 from django import forms
-from products.models import Product
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -7,10 +6,6 @@ User = get_user_model()
 class SetCodeForm(forms.Form):
     phonemail = forms.CharField()
     code = forms.CharField() 
-
-class EditCartForm(forms.Form):
-    count = forms.IntegerField()
-    code = forms.IntegerField()
     
 class FinalAddresForm(forms.Form):
     Address = forms.CharField(widget=forms.Textarea)

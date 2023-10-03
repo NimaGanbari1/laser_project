@@ -8,7 +8,7 @@ from .models import Order
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from users.models import Cart
+from Cart.models import Cart
 from products.models import Product
 from django.contrib.auth import get_user_model
 User = get_user_model()

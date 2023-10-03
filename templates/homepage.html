@@ -38,7 +38,7 @@
             <p><a href="{% provider_login_url 'google' %}?next=/">login with google</a></p>
         {%endif%}
         {%if request.user.is_authenticated %}
-            <p><a href="users/cart/">سبد خرید</a></p>
+            <p><a href="cart/">سبد خرید</a></p>
             <p><a href="users/profile/">پروفایل</a></p>
             <p><a href="/auth/logout/">خروج از حساب کاربری</a></p>
         {%endif%}

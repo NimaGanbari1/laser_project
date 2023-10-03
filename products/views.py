@@ -3,7 +3,6 @@ from .models import Category, Product, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
 from .forms import CreateCartForm, CreateCommentForm
-from users.models import Cart
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -145,10 +144,10 @@ def TypeCategory(request, type):
     Products = None
     try:
         if type == None or type == "None":
-            Products = Product.objects.all()
+            Products = Product.objects.filter(is_active=True)
         else:
-            temp = Category.objects.get(title=type)
-            Products = Product.objects.filter(categories=temp.id)
+            temp = Category.objects.get(title=type,is_enable=True)
+            Products = Product.objects.filter(categories=temp.id,is_active=True)
     except Product.DoesNotExist as e:
         raise e
     except Category.DoesNotExist as e:

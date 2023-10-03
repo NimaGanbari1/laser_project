@@ -18,6 +18,9 @@ LOCAL_APPS = [
     'products',
     'users',
     'order', 
+    'Authentication',
+    'Cart',
+    
 ]
 
 THIRD_PARTY_APPS = [

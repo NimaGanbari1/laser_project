@@ -204,30 +204,3 @@ class Province(models.Model):
     def __str__(self):
         return self.name
 
-
-class Cart(models.Model):
-    #ListOfCode = ListCharField(
-    #    base_field=models.CharField(_("code"), max_length=7),
-    #    size=15,
-    #    max_length=130,  # 6 * 10 character nominals, plus commas
-    #)
-    #ListOfCount = ListCharField(
-    #    base_field=models.CharField(_("count"), max_length=4),
-    #    size=15,
-    #    max_length=90,  # 6 * 10 character nominals, plus commas
-    #)
-    Code = models.IntegerField()
-    Count = models.PositiveIntegerField()
-    user = models.ForeignKey(to=User,related_name='carts', on_delete=models.CASCADE)
-    
-    #def __str__(self):
-    #    return self.user
-    class Meta:
-        #اسم تیبلی که برای پکیج در دیتابیس در نظر گرفته میشود است
-        db_table = "Carts"
-        verbose_name = _("Cart")
-        verbose_name_plural = _("Carts")
-    
-    
-    
-    

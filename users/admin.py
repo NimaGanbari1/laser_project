@@ -1,5 +1,4 @@
 from django.contrib import admin
-#from .models import UserProfile
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
@@ -49,15 +48,7 @@ class MyUserAdmin(UserAdmin):
         return queryset,may_have_duplicates
 
 
-class CartAdmin(admin.ModelAdmin):
-    list_display = ['id','Code','Count','user']
-    #زمانی که بر روی یوزر در پنل ادمین کلیک میکنیم ارور میدهد
-    #list_display_links = ['user']
-    #pass
-    
          
-    
     
 admin.site.unregister(Group)
 admin.site.register(User,MyUserAdmin)   
-admin.site.register(Cart,CartAdmin)
