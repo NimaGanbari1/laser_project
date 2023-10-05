@@ -1,10 +1,16 @@
-from django.shortcuts import render, redirect
-from .models import Category, Product, Comment
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse
-from .forms import CreateCartForm, CreateCommentForm
+# Django
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+
+# Local
+from Cart.models import Cart
+from .models import Category, Product, Comment
+from .forms import CreateCartForm, CreateCommentForm
+
+
 User = get_user_model()
 
 
@@ -24,9 +30,9 @@ def ProductSearch(request):
         return HttpResponse({"detail": f"Error: You do not have permission to access this method {request.method}"})
 
 
-def create_cart(code1, count1, user1):
+def create_cart(code1, count1, user1, request):
     try:
-        new_cart = Cart.objects.create(Code=code1, Count=count1, user=user1)
+        new_cart = Cart.objects.create(Code=code1,Count=count1,user=user1)
         return new_cart
     except Exception as e:
         messages.error(request, f"Error: {e}", "failed")
@@ -88,12 +94,15 @@ def ProductDetail(request, id):
                 cd = form.cleaned_data
                 phonemail = cd['user']
                 user = None
-                if phonemail.isdigit():
-                    user = User.objects.get(phone_number=int(phonemail))
-                else:
-                    user = User.objects.get(email=phonemail)
-
-                new_cart = create_cart(cd['uniqeCode'], cd['count'], user)
+                # Because we check the authentication at the beginning, there is no need for more Try
+                try:
+                    if phonemail.isdigit():
+                        user = User.objects.get(phone_number=int(phonemail))
+                    else:
+                        user = User.objects.get(email=phonemail)
+                except User.DoesNotExist:
+                    user = User.objects.get(username=phonemail)
+                new_cart = create_cart(cd['uniqeCode'], cd['count'], user, request)
                 messages.success(request, "Added to cart")
                 return redirect('/')
             else:
@@ -146,8 +155,9 @@ def TypeCategory(request, type):
         if type == None or type == "None":
             Products = Product.objects.filter(is_active=True)
         else:
-            temp = Category.objects.get(title=type,is_enable=True)
-            Products = Product.objects.filter(categories=temp.id,is_active=True)
+            temp = Category.objects.get(title=type, is_enable=True)
+            Products = Product.objects.filter(
+                categories=temp.id, is_active=True)
     except Product.DoesNotExist as e:
         raise e
     except Category.DoesNotExist as e:

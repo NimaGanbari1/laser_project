@@ -151,13 +151,8 @@ CACHES = {
         'LOCATION': 'unique-snowflake',
     }
 }
+
 #This section is related to banking system settings
-
-INTERNAL_IPS = [
-   '127.0.0.1',
-]
-
-
 AZ_IRANIAN_BANK_GATEWAYS = {
    'GATEWAYS': {
        'IDPAY': {
@@ -166,19 +161,22 @@ AZ_IRANIAN_BANK_GATEWAYS = {
            'X_SANDBOX': 1,  # 0 disable, 1 active
        }
    },
-   'IS_SAMPLE_FORM_ENABLE': True, # اختیاری و پیش فرض غیر فعال است
+   'IS_SAMPLE_FORM_ENABLE': True,
    'DEFAULT': 'IDPAY',
-   'CURRENCY': 'IRR', # اختیاری
-   'TRACKING_CODE_QUERY_PARAM': 'tc', # اختیاری
-   'TRACKING_CODE_LENGTH': 16, # اختیاری
-   'SETTING_VALUE_READER_CLASS': 'azbankgateways.readers.DefaultReader', # اختیاری
+   'CURRENCY': 'IRR',
+   'TRACKING_CODE_QUERY_PARAM': 'tc',
+   'TRACKING_CODE_LENGTH': 16, 
+   'SETTING_VALUE_READER_CLASS': 'azbankgateways.readers.DefaultReader',
    'BANK_PRIORITIES': [
-   ], # اختیاری
-   'IS_SAFE_GET_GATEWAY_PAYMENT': False, #اختیاری، بهتر است True بزارید.
-   'CUSTOM_APP': None, # اختیاری 
+   ],
+   'IS_SAFE_GET_GATEWAY_PAYMENT': False,
+   'CUSTOM_APP': None,
 }
 
 
+INTERNAL_IPS = [
+   '127.0.0.1',
+]
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     'allauth.account.auth_backends.AuthenticationBackend'

@@ -5,6 +5,9 @@ from django.core import validators
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, send_mail
 from django_mysql.models import ListCharField
+from django.contrib import messages
+from django.shortcuts import redirect
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -12,7 +15,10 @@ class UserManager(BaseUserManager):
     def _create_user(self, username, phone_number, email, password, is_staff, is_superuser, **extra_fields):
         """
         Create and save a user with the given username, email, and password.
-        """
+        """        
+        
+        
+        
         now = timezone.now()
         email = self.normalize_email(email)
         user = self.model(phone_number=phone_number,
@@ -135,35 +141,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.email = None
         super().save(*args, **kwargs)
 
-
-"""class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete= models.CASCADE)
-    nick_name = models.CharField(verbose_name=_('nick name'),max_length=150,blank=True)
-    avatar = models.ImageField(_('avatar'),blank=True,null=True)
-    birthday = models.DateField(_('birthday'),null=True,blank=True)
-    gender = models.BooleanField(_('gender'),help_text=_('female is False,male is True,null is unset'))
-    province = models.ForeignKey(verbose_name=_('province'),to='Province',null=True, on_delete= models.SET_NULL)
-    
-    
-    class Meta:
-        db_table = "user_profiles"
-        verbose_name = _('profile')
-        verbose_name_plural = "user_profiles"
-    @property
-    def get_first_name(self):
-        return self.user.first_name
-        
-    @property
-    def get_last_name(self):
-        return self.user.last_name
-    
-    @property
-    def get_nickname(self):
-        return self.nick_name if self.nick_name else self.user.username
-    
-    def __str__(self):
-        return self.user.first_name
-"""
 
 
 class Device(models.Model):
