@@ -1,18 +1,9 @@
-<table class="table table-bordered">
-    <!--<thead>
-        <tr>
-            <th>title</th>
-            <th>price</th>
-            <th>caption</th>
-            <th>is_active</th>
-            <th>is_enable</th>
-            <th>uniqe_code</th>
-            <th>categories</th>
-            <th>create_time</th>
-        </tr>
-    </thead>-->
+<table class="table table-bordered"  style = "width:10%">
         <tbody>
-                <tr>
+            <tr>
+                {%for f in post.files.all%}
+                    <img src = "/media/{{f.fil}}" width="50" height="60">
+                {%endfor%}
                 <p>title: {{ post.title }}</p>
                 <p>price: {{ post.price }}</p>
                 <p>caption: {{ post.caption }}</p>
@@ -28,18 +19,19 @@
                     {{f}}
                 {%endfor%}
                 <br>
-                {%for f in post.files.all%}
-                    <img src = "/media/{{f.fil}}" width="50" height="60">
-                {%endfor%}
+                
                 <p>create_time: {{ post.create_time }}</p>
-                </tr>
+                
                 <hr>        
                 <form action="" method="post">
                     {% csrf_token %}
-                    <p>Count: {{ form.count }}</p>
+                    <input type="number" name="count" min="1" value = '{{ form.count.value }}'>
                     <!--در این قسمت باید این دو فیلد پایینی را جوری تنظیم کنیم که تغییر نکند-->
-                    <p readonly>uniqe code: {{ form.uniqeCode }}</p>
-                    <p readonly>user: {{ form.user }}</p>
+                    <input type="hidden" name="uniqeCode" value = '{{ form.uniqeCode.value }}'>
+                    {% comment %} <p>zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz {{ form.user.value }}</p> {% endcomment %}
+                    {% comment %} <p readonly>user: {{ form.user }}</p> {% endcomment %}
+                    {% comment %} <input type="text" style="display : none" value="nimadfm1400@gmail.com"> {% endcomment %}
+                    <input type="hidden" name="user" value = '{{ form.user.value }}'>
                     <input type="submit" value="ثبت شفارش">
                 </form>
                 <hr>
@@ -59,13 +51,27 @@
                     <p>{{ comform }}</p>
                     <input type="submit" value="ارسال دیدگاه">
                 </form>
-        </tbody>
+            </tr>
+        
         <!--باید در این قسمت جایی برای انتخاب تعداد و دکمه ای برای اضافه کردن تعداد و کد این محصول به سبد خرید اضافه کنیم -->
         <!--uniqe_code-->
         <!--count-->
         <!--در کارت یک آبجکت میسازیم که یوزر همین شخص لاگین کردست و یونیک کد و تعداد این محصول رو هم مشخص میکنیم-->
         <!-- -->
-        <button><p><a href="/">بازگشت</a></p></button>
-
+            
+        </tbody>
 </table>
+
+<table style="width:100%">
+    <tr>
+        <td style="width:90%">
+        </td>
+        <td>
+            <a href="/"><button style= "width : 50px; height : 30px;"> بازگشت </button></a>
+        </td>
+</tr>
+</table>
+
+
+
   

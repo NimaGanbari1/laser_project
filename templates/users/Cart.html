@@ -52,13 +52,21 @@
             <hr>
             <button type="submit">Submit</button>
         </form>
+        {% comment %} <form>
+            {% for x in dict %}
+                <input type='hidden' name={{x.number}} value={{x.id}}>
+                <input type='number' name{{x}}=>
+            {%endfor%}
+
+             
+        </form> {% endcomment %}
         
                 
                 
 
     </main>
     <button><a href="/">بازگشت</button></a>
-    <button><a href="/users/final/">title:{{x.title}} نهایی کردن خرید</button></a>
+    <a href="/cart/final/"><button>title:{{x.title}} نهایی کردن خرید</button></a>
 </body>
 
 </html>

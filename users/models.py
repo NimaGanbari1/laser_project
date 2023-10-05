@@ -5,6 +5,9 @@ from django.core import validators
 from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, send_mail
 from django_mysql.models import ListCharField
+from django.contrib import messages
+from django.shortcuts import redirect
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -12,18 +15,12 @@ class UserManager(BaseUserManager):
     def _create_user(self, username, phone_number, email, password, is_staff, is_superuser, **extra_fields):
         """
         Create and save a user with the given username, email, and password.
-        """
+        """        
+        
+        
+        
         now = timezone.now()
-        #if phone_number != None:
-        #    email = phone_number
-        #else:
-        #    phone_number = email
         email = self.normalize_email(email)
-        # Lookup the real model class from the global app registry so this
-        # manager method can be used in migrations. This is fine because
-        # managers are by definition working on the real model.
-        # GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
-        # username = GlobalUserModel.normalize_username(username)
         user = self.model(phone_number=phone_number,
                           is_staff=is_staff,
                           is_superuser=is_superuser,
@@ -74,8 +71,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         help_text=_(
             'Required. 32 characters or fewer. Letters, digits and . _ only.'),
-        #validators=[validators.RegexValidator(
-        #    r'^[a-zA-Z0-9][a-zA-Z0-9_\.]+$', _('Enter a valid username starting with a-z.'))],
         error_messages={
             'unique': _("A user with that username already exists."),
             'validators': _('invalid'),
@@ -95,11 +90,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True, 
         blank=True
         )
-    # nick_name = models.CharField(verbose_name=_('nick name'),max_length=150,blank=True)
-    #avatar = models.ImageField(_('avatar'), blank=True, null=True)
-    # birthday = models.DateField(_('birthday'),null=True,blank=True)
-    # gender = models.BooleanField(_('gender'),null=True,help_text=_('female is False,male is True,null is unset'))
-    # province = models.ForeignKey(verbose_name=_('province'),to='Province',null=True, on_delete= models.SET_NULL)
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -141,9 +131,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Return the short name for the user."""
         return self.first_name
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
-        """Send an email to this user."""
-        send_mail(subject, message, from_email, [self.email], **kwargs)
 
     @property
     def is_loggein_user(self):
@@ -154,35 +141,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.email = None
         super().save(*args, **kwargs)
 
-
-"""class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete= models.CASCADE)
-    nick_name = models.CharField(verbose_name=_('nick name'),max_length=150,blank=True)
-    avatar = models.ImageField(_('avatar'),blank=True,null=True)
-    birthday = models.DateField(_('birthday'),null=True,blank=True)
-    gender = models.BooleanField(_('gender'),help_text=_('female is False,male is True,null is unset'))
-    province = models.ForeignKey(verbose_name=_('province'),to='Province',null=True, on_delete= models.SET_NULL)
-    
-    
-    class Meta:
-        db_table = "user_profiles"
-        verbose_name = _('profile')
-        verbose_name_plural = "user_profiles"
-    @property
-    def get_first_name(self):
-        return self.user.first_name
-        
-    @property
-    def get_last_name(self):
-        return self.user.last_name
-    
-    @property
-    def get_nickname(self):
-        return self.nick_name if self.nick_name else self.user.username
-    
-    def __str__(self):
-        return self.user.first_name
-"""
 
 
 class Device(models.Model):
@@ -223,30 +181,3 @@ class Province(models.Model):
     def __str__(self):
         return self.name
 
-
-class Cart(models.Model):
-    #ListOfCode = ListCharField(
-    #    base_field=models.CharField(_("code"), max_length=7),
-    #    size=15,
-    #    max_length=130,  # 6 * 10 character nominals, plus commas
-    #)
-    #ListOfCount = ListCharField(
-    #    base_field=models.CharField(_("count"), max_length=4),
-    #    size=15,
-    #    max_length=90,  # 6 * 10 character nominals, plus commas
-    #)
-    Code = models.IntegerField()
-    Count = models.PositiveIntegerField()
-    user = models.ForeignKey(to=User,related_name='carts', on_delete=models.CASCADE)
-    
-    #def __str__(self):
-    #    return self.user
-    class Meta:
-        #اسم تیبلی که برای پکیج در دیتابیس در نظر گرفته میشود است
-        db_table = "Carts"
-        verbose_name = _("Cart")
-        verbose_name_plural = _("Carts")
-    
-    
-    
-    

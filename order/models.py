@@ -1,9 +1,14 @@
+# Django
 from django.db import models
-import random
+from django_mysql.models import ListCharField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
+
+# Python 
+import random
+
 User = get_user_model()
-from django_mysql.models import ListCharField
+
 
 class Order(models.Model):
     STATUS_VOID = 0
@@ -42,12 +47,12 @@ class Order(models.Model):
     ProductCodes = ListCharField(
         base_field=models.CharField(_("code"), max_length=7),
         size=15,
-        max_length=130,  # 6 * 10 character nominals, plus commas
+        max_length=130,  
     )
     ProductCounts = ListCharField(
         base_field=models.CharField(_("count"), max_length=4),
         size=15,
-        max_length=90,  # 6 * 10 character nominals, plus commas
+        max_length=90, 
     )
     Price = models.BigIntegerField()
     user = models.ForeignKey(to=User,related_name='Orders', on_delete=models.CASCADE)
@@ -60,7 +65,10 @@ class Order(models.Model):
     update_time = models.DateTimeField(
         verbose_name=_("update time"), auto_now=True)
     class Meta:
-        #اسم تیبلی که برای پکیج در دیتابیس در نظر گرفته میشود است
         db_table = "Orders"
         verbose_name = _("Order")
         verbose_name_plural = _("Orders")
+        
+    def __str__(self):
+        return str(self.user)
+    

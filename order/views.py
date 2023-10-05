@@ -1,19 +1,26 @@
-from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+# Django
 from django.urls import reverse
 from django.http import HttpResponse, Http404
-import logging
 from django.contrib import messages
-import random
-from .models import Order
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from users.models import Cart
-from products.models import Product
 from django.contrib.auth import get_user_model
+
+# Python 
+import logging
+import random
+
+# Third Party
+from azbankgateways import bankfactories, models as bank_models, default_settings as settings
+
+# Local
+from .models import Order
+from Cart.models import Cart
+from products.models import Product
+
 User = get_user_model()
 
-#در هنگام بازگشت از بانک به این تابع منتقل میشود
 def callback_gateway_view(request):
     tracking_code = request.GET.get(settings.TRACKING_CODE_QUERY_PARAM, None)
     if not tracking_code:
@@ -23,36 +30,40 @@ def callback_gateway_view(request):
     try:
         bank_record = bank_models.Bank.objects.get(tracking_code=tracking_code)
     except bank_models.Bank.DoesNotExist:
-        print("این لینک معتبر نیست2.")
+        print("این لینک معتبر نیست.")
         return 0
 
-    # در این قسمت باید از طریق داده هایی که در بانک رکورد وجود دارد، رکورد متناظر یا هر اقدام مقتضی دیگر را انجام دهیم
+    # In this section, we must perform the corresponding record or any other appropriate action through the data in the record bank.
     if bank_record.is_success:
-        # پرداخت با موفقیت انجام پذیرفته است و بانک تایید کرده است.
-        # می توانید کاربر را به صفحه نتیجه هدایت کنید یا نتیجه را نمایش دهید.
         print("پرداخت با موفقیت انجام شد.")
         return 10
 
-    # پرداخت موفق نبوده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.
     print("پرداخت با شکست مواجه شده است. اگر پول کم شده است ظرف مدت ۴۸ ساعت پول به حساب شما بازخواهد گشت.")
     return 20
 
 
-@csrf_exempt
-@require_http_methods(["GET", "POST"])
+# When returning from the bank, it is transferred to this function
 def Ok_Record(request):
-    # ابتدا به بانک درخواست میدهیم که این کاربر آیا پرداخت موفقی داشته است یا خیر؟ در تابع بالایی
-    # در صورتی که اوکی بود یک آبجکت ساخته میشود و سیو میشود
     # البت بهتر است که وقتی سفارشی ثبت شد یک پیام یا ایمیل برای ادمین فرستاده شود
-    # ولی اگر اوکی نبود به کاربر نمایش داده شود که پرداخت با  مشکل مواجه شده است و از دوباره تلاش کند
-    # در این قسمت ما اطلاعات مربوط به ساخت آبجکت را گرفتیم و با
-    # 'products':products,'price':TotalPrice,'user':user
-    # به آنها دسترسی داریم
+    # In this part, we got the information related to the creation of the object
+    # we have access to them through 'products':products,'price':TotalPrice,'user':user
     if request.method == "GET":
         status = callback_gateway_view(request)
         context = None
+        match status:
+            case 0:
+                print("0")
+            case 10:
+                print("10")
+            case 20:
+                print("20")
+            case 30:
+                print("30")
+            case 31:
+                print("31")
+                
         if status == 0:
-            # اگر لینک بازگرداننده معتبر نباشد
+            # If the return link is not valid
             messages.error(request, "این لینک معتبر نیست.", "failed")
             context = {
                 "status": "این لینک معتبر نیست."
