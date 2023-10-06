@@ -123,6 +123,11 @@ def register_v(request):
                     cache.set(str(phonemail), str(code_random), 3*60)
                     send_mail(phonemail, code_random)
                     return redirect('/auth/create/')
+        else:
+            messages.error(
+                    request, 'data is not valid', 'error')
+            response = redirect('/auth/register/')
+            return response
     else:
         form = RegisterFrom()
 
